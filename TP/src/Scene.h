@@ -13,9 +13,10 @@ namespace OM3D {
 class Scene : NonMovable {
 
     public:
-        Scene();
-
+        explicit Scene(bool point_cloud = false) {this->point_cloud = point_cloud;}
+        bool point_cloud;
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
+        static Result<std::unique_ptr<Scene>> from_ply(const std::string& file_name);
 
         void render() const;
 
@@ -34,6 +35,7 @@ class Scene : NonMovable {
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;
         std::vector<std::shared_ptr<Material>> _materials;
+
 
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);

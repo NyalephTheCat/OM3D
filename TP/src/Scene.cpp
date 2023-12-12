@@ -7,8 +7,6 @@
 
 namespace OM3D {
 
-Scene::Scene() {
-}
 
 void Scene::add_object(SceneObject obj) {
     if (std::find(_materials.begin(), _materials.end(), obj.material()) == _materials.end())

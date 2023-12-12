@@ -211,6 +211,8 @@ std::unique_ptr<Scene> create_default_scene() {
 
     // Load default cube model
     auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
+//    auto test = Scene::from_ply(std::string(data_path) + "flowers.ply");  //! TO TEST
+//    test = Scene::from_ply(std::string(data_path) + "flowers.ply");  //! TO TEST
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 

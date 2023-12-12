@@ -33,7 +33,10 @@ file(GLOB_RECURSE EXTERNAL_FILES
         "external/glad/*.h"
         "external/imgui/*.cpp"
         "external/imgui/*.h"
-    )
+        "external/tinyply/*.cpp"
+        "external/tinyply/*.h"
+        "external/tinyply/*.hpp"
+)
 
 # Shader files
 file(GLOB_RECURSE SHADER_FILES
