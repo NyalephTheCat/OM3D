@@ -460,5 +460,121 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
     return {true, std::move(scene)};
 }
 
+SceneObject Scene::sphere_from_gltf(const std::string &file_name) {
+    const double time = program_time();
+    DEFER(std::cout << file_name << " loaded in " << std::round((program_time() - time) * 100.0) / 100.0 << "s" << std::endl);
+
+    tinygltf::TinyGLTF ctx;
+    tinygltf::Model gltf;
+
+    {
+        std::string err;
+        std::string warn;
+
+        const bool is_ascii = ends_with(file_name, ".gltf");
+        const bool ok = is_ascii
+                        ? ctx.LoadASCIIFromFile(&gltf, &err, &warn, file_name)
+                        : ctx.LoadBinaryFromFile(&gltf, &err, &warn, file_name);
+
+        if(!err.empty()) {
+            std::cerr << "Error while loading gltf: " << err << std::endl;
+        }
+        if(!warn.empty()) {
+            std::cerr << "Warning while loading gltf: " << warn << std::endl;
+        }
+
+        if(!ok) {
+            return {};
+        }
+    }
+
+    std::cout << file_name << " parsed in " << std::round((program_time() - time) * 100.0) / 100.0 << "s" << std::endl;
+
+    auto scene = std::make_unique<Scene>();
+
+    std::unordered_map<int, std::shared_ptr<Texture>> textures;
+    std::unordered_map<int, std::shared_ptr<Material>> materials;
+    std::unordered_map<int, glm::mat4> node_transforms;
+    std::vector<std::pair<int, int>> light_nodes;
+
+    {
+        std::vector<int> node_indices;
+        if(gltf.defaultScene >= 0) {
+            node_indices = gltf.scenes[gltf.defaultScene].nodes;
+        } else {
+            for(u32 i = 0; i != gltf.nodes.size(); ++i) {
+                node_indices.push_back(i);
+                node_transforms[i] = base_transform();
+            }
+        }
+
+        for(const int node_index : node_indices) {
+            parse_node_transforms(node_index, gltf, node_transforms);
+        }
+
+        for(const int node_index : node_indices) {
+            const auto& node = gltf.nodes[node_index];
+            if(const auto it = node.extensions.find("KHR_lights_punctual"); it != node.extensions.end()) {
+                const int light_index = it->second.Get("light").Get<int>();
+                if(light_index < 0 || light_index >= gltf.lights.size()) {
+                    continue;
+                }
+                light_nodes.emplace_back(std::pair{node_index, light_index});
+            }
+        }
+    }
+
+    for(auto [node_index, node_transform] : node_transforms) {
+        const tinygltf::Node& node = gltf.nodes[node_index];
+
+        if(node.mesh < 0) {
+            continue;
+        }
+
+        const tinygltf::Mesh& mesh = gltf.meshes[node.mesh];
+
+        for(size_t j = 0; j != mesh.primitives.size(); ++j) {
+            const tinygltf::Primitive& prim = mesh.primitives[j];
+
+            if(prim.mode != TINYGLTF_MODE_TRIANGLES) {
+                continue;
+            }
+
+            auto mesh = build_mesh_data(gltf, prim);
+            if(!mesh.is_ok) {
+                return {};
+            }
+
+            if(mesh.value.vertices[0].tangent_bitangent_sign == glm::vec4(0.0f)) {
+                compute_tangents(mesh.value);
+            }
+
+            std::shared_ptr<Material> material;
+            if(prim.material >= 0) {
+                auto& mat = materials[prim.material];
+
+                if(!mat) {
+                    // make material
+                    Material material_sphere = Material();
+                    material_sphere.set_program(Program::from_files("shaders/sphere.vert", "shaders/sphere.frag"));
+                    material_sphere.set_blend_mode(BlendMode::Additive);
+                    material_sphere.set_depth_test_mode(DepthTestMode::None);
+                    material_sphere.set_frontface_culling(true);
+                    material_sphere.set_uniform("u_color", glm::vec3(1.0f, 0.0f, 0.0f));
+                    mat = std::make_shared<Material>(material_sphere);
+                }
+
+                material = mat;
+            }
+
+            auto scene_object = SceneObject(std::make_shared<StaticMesh>(mesh.value), std::move(material));
+            scene_object.set_transform(node_transform);
+            return scene_object;
+//            scene->add_object(std::move(scene_object));
+        }
+    }
+    return {};
+}
+
 }
 

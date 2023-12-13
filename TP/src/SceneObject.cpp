@@ -41,6 +41,27 @@ void SceneObject::render() const {
     glDisable(GL_CULL_FACE);
 }
 
+void SceneObject::render_lightSphere(const glm::vec3 &position, float radius, const glm::vec3 &color, const glm::mat4 &view_proj) {
+
+    if(!_material || !_mesh) {
+        return;
+    }
+
+    _material->set_uniform(HASH("model"), transform());
+
+    // uniform
+    _material->set_uniform(HASH("light_pos"), position);
+    _material->set_uniform(HASH("light_radius"), radius);
+    _material->set_uniform(HASH("light_color"), color);
+    _material->set_uniform(HASH("view_proj"), view_proj);
+
+    _material->bind();
+    _mesh->draw();
+
+    // Disable backface culling for the rest of the objects
+    glDisable(GL_CULL_FACE);
+}
+
 void SceneObject::set_transform(const glm::mat4& tr) {
     _transform = tr;
 }
@@ -72,6 +93,10 @@ bool SceneObject::check_frustum(const Camera camera) const {
 
 SphericalBoundingBox SceneObject::bounding_box() const {
     return _mesh->bounding_box();
+}
+
+void SceneObject::UpdateBoundingBox(float factor) {
+    _mesh->UpdateBoundingBox(factor);
 }
 
 }

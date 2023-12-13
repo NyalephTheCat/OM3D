@@ -32,6 +32,10 @@ void Material::set_backface_culling(bool enabled) {
     _backface_culling = enabled;
 }
 
+void Material::set_frontface_culling(bool b) {
+    _frontface_culling = b;
+}
+
 void Material::bind() const {
     switch(_blend_mode) {
         case BlendMode::None:
@@ -71,9 +75,15 @@ void Material::bind() const {
         break;
     }
 
-    if (_backface_culling) {
+    if (_backface_culling) { // if enabled, cull back faces, meaning only draw front faces
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+    }
+
+    if (_frontface_culling) { // if enabled, cull front faces, meaning only draw back faces
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
         glFrontFace(GL_CCW);
     }
 

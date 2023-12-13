@@ -41,8 +41,11 @@ class Scene : NonMovable {
         glm::vec3 sun_direction() const { return _sun_direction; }
         glm::vec3 sun_color() const { return _sun_color; }
         float sun_intensity() const { return _sun_intensity; }
+        void set_sun_day() { _sun_intensity = _sun_day_intensity; }
+        void set_sun_night() { _sun_intensity = _sun_night_intensity; }
         glm::vec3 ambient_color() const { return _ambient_color; }
 
+        static SceneObject sphere_from_gltf(const std::string& file_name);
 
     private:
         std::vector<SceneObject> _objects;
@@ -52,6 +55,8 @@ class Scene : NonMovable {
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);
         float _sun_intensity = 1.0f;
+        float _sun_day_intensity = 1.0f;
+        float _sun_night_intensity = 0.1f;
         glm::vec3 _ambient_color = glm::vec3(0.01f);
 
 

@@ -25,10 +25,14 @@ class SceneObject {
         std::shared_ptr<Material> material() const { return _material; }
 
         SphericalBoundingBox bounding_box() const;
+        void UpdateBoundingBox(float factor);
+
         void setup() const;
         int index_buffer_count() {return _mesh->index_buffer_count();}
 
-    private:
+        void render_lightSphere(const glm::vec3 &position, float radius, const glm::vec3 &color, const glm::mat4 &inv_view_proj);
+
+private:
         glm::mat4 _transform = glm::mat4(1.0f);
 
         std::shared_ptr<StaticMesh> _mesh;

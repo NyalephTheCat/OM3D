@@ -145,6 +145,19 @@ void gui(ImGuiRenderer& imgui) {
             ImGui::EndMenu();
         }
 
+        if(ImGui::BeginMenu("Sun")) {
+            if(ImGui::MenuItem("Day"))
+                scene->set_sun_day();
+            if(ImGui::MenuItem("Night"))
+                scene->set_sun_night();
+            ImGui::EndMenu();
+        }
+
+        if(ImGui::BeginMenu("Exposure")) {
+            ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
+            ImGui::EndMenu();
+        }
+
         ImGui::Separator();
         ImGui::TextUnformatted(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
@@ -211,7 +224,7 @@ std::unique_ptr<Scene> create_default_scene() {
     auto scene = std::make_unique<Scene>();
 
     // Load default cube model
-    auto result = Scene::from_gltf(std::string(data_path) + "bistro_lights.glb");
+    auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 
@@ -300,10 +313,12 @@ int main(int argc, char** argv) {
 
     auto g_buffer_program = Program::from_files("display_g_buffer.frag", "screen.vert");
     auto sun_lightning_program = Program::from_files("sunlight.frag", "screen.vert");
-    auto point_lightning_program = Program::from_files("pointlight.frag", "screen.vert");
+//    auto point_lightning_program = Program::from_files("pointlight.frag", "screen.vert");
     auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
 
     RendererState renderer;
+
+    SceneObject light_sphere = Scene::sphere_from_gltf(std::string(data_path) + "sphere.glb");
 
     for(;;) {
         glfwPollEvents();
@@ -357,8 +372,8 @@ int main(int argc, char** argv) {
         // Apply lightning.frag
         {
             // Set render mode to additive
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//            glEnable(GL_BLEND);
+//            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
             renderer.lighting_framebuffer.bind();
             sun_lightning_program->bind();
@@ -376,23 +391,26 @@ int main(int argc, char** argv) {
 
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
-            point_lightning_program->bind();
+//            point_lightning_program->bind();  // done in SceneObject::render_lightSphere
 
-            renderer.albedo_texture.bind(0);
+            renderer.albedo_texture.bind(0); // do these need to be bound during render_lightSphere?
             renderer.normal_texture.bind(1);
             renderer.depth_texture.bind(2);
 
+            int i = 0;
             // For each point light
             for (const PointLight& light : scene->point_lights()) {
-                // uniform
-                point_lightning_program->set_uniform(HASH("light_pos"), light.position());
-                point_lightning_program->set_uniform(HASH("light_radius"), light.radius());
-                point_lightning_program->set_uniform(HASH("light_color"), light.color());
+                // check if light is in camera frustum
+                light_sphere.set_transform(glm::translate(glm::mat4(1.0f), light.position()));
+                light_sphere.UpdateBoundingBox(light.radius());
+                if (!light_sphere.check_frustum(scene->camera()))
+                    continue;
+                i++;
+                light_sphere.render_lightSphere(light.position(), light.radius(), light.color(), scene->camera().view_proj_matrix());
 
-                point_lightning_program->set_uniform(HASH("inv_view_proj"), glm::inverse(scene->camera().view_proj_matrix()));
-
-                glDrawArrays(GL_TRIANGLES, 0, 3);
+//                glDrawArrays(GL_TRIANGLES, 0, 3);
             }
+            std::cout << "rendered " << i << " lights" << std::endl;
         }
 
         // Apply a tonemap in compute shader

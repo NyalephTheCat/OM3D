@@ -12,7 +12,7 @@ uniform vec3 light_pos;
 uniform vec3 light_color;
 uniform float light_radius;
 
-uniform mat4 inv_viewproj;
+uniform mat4 inv_view_proj;
 
 vec3 unproject(vec2 uv, float depth, mat4 inv_viewproj) {
     const vec3 ndc = vec3(uv * 2.0 - vec2(1.0), depth);
@@ -28,7 +28,7 @@ void main() {
     vec3 normal = texelFetch(in_normal, coord, 0).rgb;
     float depth = pow(texelFetch(in_depth, coord, 0).r, 0.25);
 
-    vec3 pos = unproject(in_uv, depth, inv_viewproj);
+    vec3 pos = unproject(in_uv, depth, inv_view_proj);
 
     vec3 light_dir = normalize(light_pos - pos);
     float light_dist = distance(light_pos, pos);

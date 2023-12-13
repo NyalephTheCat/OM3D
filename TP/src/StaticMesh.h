@@ -36,6 +36,7 @@ class StaticMesh : NonCopyable {
         void setup() const;
         void draw() const;
         int index_buffer_count() {return int(_index_buffer.element_count());}
+        void UpdateBoundingBox(float factor);
 
     private:
         TypedBuffer<Vertex> _vertex_buffer;

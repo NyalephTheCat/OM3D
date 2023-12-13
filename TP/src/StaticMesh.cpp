@@ -81,4 +81,8 @@ void StaticMesh::draw() const {
 const SphericalBoundingBox& StaticMesh::bounding_box() const {
     return _bounding_box;
 }
+
+void StaticMesh::UpdateBoundingBox(float factor) {
+    _bounding_box.radius = 1 * factor;
+}
 }

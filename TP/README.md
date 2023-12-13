@@ -1,6 +1,6 @@
 # Difference de setup avec le projet de base
-Les chemin d'accès de shader & texture sont différents: "../" a été retiré à chacun.\
-un flag de compilation a été retiré dans le fichier CMakeLists.txt (mis en commentaire)
+(Les chemin d'accès de shader & texture dans graphics.h peuvent être différents de par défaut)\
 \
-nouveau frag shader à realiser: création du G buffer
-2e frag simple: lecture d'un des 3 chanmp du g buffer en fc d'un variable de debug
+IGgui: option pour changer intensité du soleil (jour/nuit)\
+Lumière du soleil rendu en deffered avec succès\
+Lumière des point lights rendu en deffered sans succès.. malgré import et setup de l'object light_sphere réussi, avec son materiau custom et shader correspondant.\
