@@ -13,6 +13,8 @@ uniform vec3 sun_color;
 uniform float sun_intensity;
 uniform vec3 ambient_color;
 
+uniform vec3 view_dir;
+
 void main() {
     const ivec2 coord = ivec2(gl_FragCoord.xy);
     vec3 frag;
@@ -24,6 +26,12 @@ void main() {
     // Apply diffuse
     float diffuse = max(dot(normal, normalize(sun_dir)), 0.0);
     frag = albedo * sun_color * sun_intensity * diffuse;
+
+    // Apply specular
+//    vec3 reflect = reflect(-sun_dir, normal);
+//    float specular = pow(max(dot(reflect, view_dir), 0.0), 32.0);
+//    vec3 ks = vec3(0.03);
+//    frag += sun_color * specular * ks;
 
     // Apply ambient
     frag += albedo * ambient_color;

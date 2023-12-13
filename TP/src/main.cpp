@@ -19,6 +19,7 @@ using namespace OM3D;
 
 static float delta_time = 0.0f;
 static std::unique_ptr<Scene> scene;
+static float exposure = 1.0;
 static std::vector<std::string> scene_files;
 
 namespace OM3D {
@@ -210,7 +211,7 @@ std::unique_ptr<Scene> create_default_scene() {
     auto scene = std::make_unique<Scene>();
 
     // Load default cube model
-    auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
+    auto result = Scene::from_gltf(std::string(data_path) + "bistro_lights.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 
@@ -247,11 +248,11 @@ struct RendererState {
             state.normal_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
             state.display_texture = Texture(size, ImageFormat::RGBA8_UNORM);
             state.lighting_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-//            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
             state.g_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.albedo_texture, &state.normal_texture});
             state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture});
             state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture});
-//            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
+            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
         }
 
         return state;
@@ -264,12 +265,12 @@ struct RendererState {
     Texture normal_texture;
     Texture display_texture;
     Texture lighting_texture;
-//    Texture tone_mapped_texture;
+    Texture tone_mapped_texture;
 
     Framebuffer g_framebuffer;
     Framebuffer display_framebuffer;
     Framebuffer lighting_framebuffer;
-//    Framebuffer tone_map_framebuffer;
+    Framebuffer tone_map_framebuffer;
 };
 
 int main(int argc, char** argv) {
@@ -300,7 +301,7 @@ int main(int argc, char** argv) {
     auto g_buffer_program = Program::from_files("display_g_buffer.frag", "screen.vert");
     auto sun_lightning_program = Program::from_files("sunlight.frag", "screen.vert");
     auto point_lightning_program = Program::from_files("pointlight.frag", "screen.vert");
-//    auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
+    auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
 
     RendererState renderer;
 
@@ -354,20 +355,51 @@ int main(int argc, char** argv) {
         }
 
         // Apply lightning.frag
-        renderer.lighting_framebuffer.bind();
-        sun_lightning_program->bind();
+        {
+            renderer.lighting_framebuffer.bind();
+            sun_lightning_program->bind();
 
-        renderer.albedo_texture.bind(0);
-        renderer.normal_texture.bind(1);
-        renderer.depth_texture.bind(2);
+            renderer.albedo_texture.bind(0);
+            renderer.normal_texture.bind(1);
+            renderer.depth_texture.bind(2);
 
-        // uniform
-        sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
-        sun_lightning_program->set_uniform(HASH("sun_color"), scene->sun_color());
-        sun_lightning_program->set_uniform(HASH("sun_intensity"), scene->sun_intensity());
-        sun_lightning_program->set_uniform(HASH("ambient_color"), scene->ambient_color());
+            // uniform
+            sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
+            sun_lightning_program->set_uniform(HASH("sun_color"), scene->sun_color());
+            sun_lightning_program->set_uniform(HASH("sun_intensity"), scene->sun_intensity());
+            sun_lightning_program->set_uniform(HASH("ambient_color"), scene->ambient_color());
+            sun_lightning_program->set_uniform(HASH("view_dir"), scene->camera().forward());
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            point_lightning_program->bind();
+
+            renderer.albedo_texture.bind(0);
+            renderer.normal_texture.bind(1);
+            renderer.depth_texture.bind(2);
+
+            // For each point light
+            for (const PointLight& light : scene->point_lights()) {
+                // uniform
+                point_lightning_program->set_uniform(HASH("light_pos"), light.position());
+                point_lightning_program->set_uniform(HASH("light_radius"), light.radius());
+                point_lightning_program->set_uniform(HASH("light_color"), light.color());
+
+                point_lightning_program->set_uniform(HASH("inv_view_proj"), glm::inverse(scene->camera().view_proj_matrix()));
+
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+            }
+        }
+
+        // Apply a tonemap in compute shader
+        {
+            renderer.tone_map_framebuffer.bind();
+            tonemap_program->bind();
+            tonemap_program->set_uniform(HASH("exposure"), exposure);
+            renderer.lighting_texture.bind(0);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+
 
         // Blit display result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
