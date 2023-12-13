@@ -360,6 +360,13 @@ int main(int argc, char** argv) {
         renderer.albedo_texture.bind(0);
         renderer.normal_texture.bind(1);
         renderer.depth_texture.bind(2);
+
+        // uniform
+        sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
+        sun_lightning_program->set_uniform(HASH("sun_color"), scene->sun_color());
+        sun_lightning_program->set_uniform(HASH("sun_intensity"), scene->sun_intensity());
+        sun_lightning_program->set_uniform(HASH("ambient_color"), scene->ambient_color());
+
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Blit display result to screen
