@@ -356,6 +356,10 @@ int main(int argc, char** argv) {
 
         // Apply lightning.frag
         {
+            // Set render mode to additive
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
             renderer.lighting_framebuffer.bind();
             sun_lightning_program->bind();
 
