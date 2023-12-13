@@ -21,7 +21,7 @@ void main() {
 
     vec3 albedo = texelFetch(in_albedo, coord, 0).rgb;
     vec3 normal = texelFetch(in_normal, coord, 0).rgb;
-    float depth = pow(texelFetch(in_depth, coord, 0).r, 0.25);
+//    float depth = pow(texelFetch(in_depth, coord, 0).r, 0.25);
 
     // Apply diffuse
     float diffuse = max(dot(normal, normalize(sun_dir)), 0.0);
@@ -34,7 +34,8 @@ void main() {
 //    frag += sun_color * specular * ks;
 
     // Apply ambient
-    frag += albedo * ambient_color;
+    frag += albedo * ambient_color;  // to multiply with albedo doesn't make sense ?
+//    frag = clamp(frag, 0.0, 0.1); // for debugging
 
     out_frag = vec4(frag, 1.0);
 }

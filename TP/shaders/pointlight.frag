@@ -3,7 +3,7 @@
 #include "utils.glsl"
 
 layout(location = 0) out vec4 out_frag;
-//layout(location = 0) in vec2 in_uv;
+layout(location = 0) in vec2 in_uv;
 layout(binding = 0) uniform sampler2D in_albedo;
 layout(binding = 1) uniform sampler2D in_normal;
 layout(binding = 2) uniform sampler2D in_depth;
@@ -28,7 +28,7 @@ void main() {
     vec3 normal = texelFetch(in_normal, coord, 0).rgb;
     float depth = pow(texelFetch(in_depth, coord, 0).r, 0.25);
 
-    vec3 pos = unproject(vec2(coord), depth, inv_viewproj);
+    vec3 pos = unproject(in_uv, depth, inv_viewproj);
 
     vec3 light_dir = normalize(light_pos - pos);
     float light_dist = distance(light_pos, pos);
@@ -39,5 +39,5 @@ void main() {
 
     frag = albedo * diffuse_color;
 
-    out_frag = vec4(frag, 1.0);
+    out_frag += vec4(frag, 1.0);
 }
