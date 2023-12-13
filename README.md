@@ -1,26 +1,8 @@
-# OM3D
-EPITA course for 5th year students
+### Difference de setup avec le projet de base
+(Les chemin d'accès de shader & texture dans graphics.h peuvent être différents de ceux par défaut)\
+\
+## Compte rendu
+Lumière du soleil rendu en deffered avec succès\
+IGgui: option pour changer intensité du soleil (jour/nuit)\
 
-Slides: https://docs.google.com/presentation/d/1qJhH0cmEMVQRhF37UOYDdw0ZKtd00_oQXW1dZrUbSL4/edit
-
-TP1: https://hackmd.io/@G2s9zdzlSd-RfTlBoN_x2A/ryY2BSgVo
-
-TP2: https://hackmd.io/@gWNtISeXQWysGQ0awDxVYQ/HyiNLHS7p
-
-TP3: https://hackmd.io/@gWNtISeXQWysGQ0awDxVYQ/S1je70OHp
-
-
-### How to build
-Requirements: cmake 3.20 minimum, C++17, and OpenGL 4.5.
-```bash
-# At the project root
-mkdir -p TP/build/debug
-cd TP/build/debug
-cmake ../..
-make
-```
-
-### Contact
-If you have a problem, please send a mail to
-- alexandre.lamure@epita.fr
-- gregoire.angerand@gmail.com
+Lumière des point lights rendu en deffered sans succès.. malgré import et setup de l'object light_sphere réussi, avec son materiau custom et shader correspondant.\
