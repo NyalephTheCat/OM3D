@@ -8,6 +8,11 @@
 #include <vector>
 #include <memory>
 
+#include <TypedBuffer.h>
+
+#include <algorithm>
+#include <shader_structs.h>
+
 namespace OM3D {
 
 class Scene : NonMovable {
@@ -17,7 +22,7 @@ class Scene : NonMovable {
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
-        void render() const;
+        void render();
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
@@ -30,6 +35,15 @@ class Scene : NonMovable {
 
         void set_sun(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f));
 
+        TypedBuffer<shader::FrameData> *data_buffer() { return &_data_buffer; }
+        TypedBuffer<shader::PointLight> *light_buffer() { return &_light_buffer; }
+
+        glm::vec3 sun_direction() const { return _sun_direction; }
+        glm::vec3 sun_color() const { return _sun_color; }
+        float sun_intensity() const { return _sun_intensity; }
+        glm::vec3 ambient_color() const { return _ambient_color; }
+
+
     private:
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;
@@ -37,9 +51,13 @@ class Scene : NonMovable {
 
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);
+        float _sun_intensity = 1.0f;
+        glm::vec3 _ambient_color = glm::vec3(0.01f);
 
 
         Camera _camera;
+        TypedBuffer<shader::FrameData> _data_buffer;
+        TypedBuffer<shader::PointLight> _light_buffer;
 };
 
 }
