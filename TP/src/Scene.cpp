@@ -43,7 +43,7 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
 
 #define MAX_INSTANCE 100
 
-void Scene::render() const {
+void Scene::render() {
     // Fill and bind frame data buffer
     _data_buffer = TypedBuffer<shader::FrameData>(nullptr, 1);
     {

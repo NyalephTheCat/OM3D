@@ -22,7 +22,7 @@ class Scene : NonMovable {
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
-        void render() const;
+        void render();
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
@@ -35,8 +35,8 @@ class Scene : NonMovable {
 
         void set_sun(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f));
 
-    TypedBuffer<shader::FrameData> data_buffer() {return _data_buffer;}
-        TypedBuffer<shader::PointLight> light_buffer() => _light_buffer;
+        TypedBuffer<shader::FrameData> *data_buffer() { return &_data_buffer; }
+        TypedBuffer<shader::PointLight> *light_buffer() { return &_light_buffer; }
     private:
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;

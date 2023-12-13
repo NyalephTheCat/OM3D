@@ -210,7 +210,7 @@ std::unique_ptr<Scene> create_default_scene() {
     auto scene = std::make_unique<Scene>();
 
     // Load default cube model
-    auto result = Scene::from_gltf(std::string(data_path) + "bistro_lights.glb");
+    auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 
@@ -354,18 +354,13 @@ int main(int argc, char** argv) {
         }
 
         // Apply lightning.frag
-        {
-            renderer.lighting_framebuffer.bind();
-            sun_lightning_program->bind();
+        renderer.lighting_framebuffer.bind();
+        sun_lightning_program->bind();
 
-            renderer.albedo_texture.bind(0);
-            renderer.normal_texture.bind(1);
-            renderer.depth_texture.bind(2);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-
-            point_lightning_program->bind();
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-        }
+        renderer.albedo_texture.bind(0);
+        renderer.normal_texture.bind(1);
+        renderer.depth_texture.bind(2);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Blit display result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
