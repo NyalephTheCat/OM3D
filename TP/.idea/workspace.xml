@@ -23,9 +23,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ba7ed963-3f65-4067-b722-bc639f3a065b" name="Changes" comment="build compatible with home pc + gitignore">
+    <list default="true" id="ba7ed963-3f65-4067-b722-bc639f3a065b" name="Changes" comment="updated readme">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ImGuiRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ImGuiRenderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ImGuiRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/ImGuiRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Texture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Texture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphics.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphics.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,27 +60,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;noe&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/noeto/Desktop/TP-Piscine/OM3D/TP&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "CMake Application.TP.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "TVID",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "E:/Desktop/Cours/TVID",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CPPToolchains",
+    "structure.view.defaults.are.configured": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="CMake Application.TP">
-    <configuration name="TP" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--validate" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TP" TARGET_NAME="TP" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="TP" RUN_TARGET_NAME="TP">
+    <configuration name="TP" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TP" TARGET_NAME="TP" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="TP" RUN_TARGET_NAME="TP">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -102,8 +112,8 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.TP" />
-      <item itemvalue="CMake Application.uninstall" />
       <item itemvalue="CMake Application.glfw" />
+      <item itemvalue="CMake Application.uninstall" />
       <item itemvalue="CMake Application.update_mappings" />
       <item itemvalue="Makefile Target.default_target" />
     </list>
@@ -127,6 +137,11 @@
       <workItem from="1701270327183" duration="969000" />
       <workItem from="1701305804810" duration="313000" />
       <workItem from="1701331715567" duration="5106000" />
+      <workItem from="1702677009484" duration="32000" />
+      <workItem from="1703095593930" duration="182000" />
+      <workItem from="1703095835150" duration="2302000" />
+      <workItem from="1703102305809" duration="11192000" />
+      <workItem from="1703154020372" duration="3305000" />
     </task>
     <task id="LOCAL-00001" summary="build compatible with home pc + gitignore">
       <option name="closed" value="true" />
@@ -136,17 +151,40 @@
       <option name="project" value="LOCAL" />
       <updated>1701255408093</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="minor tweaks">
+      <option name="closed" value="true" />
+      <created>1702499115786</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1702499115786</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Deffered lightning tthhiiisss close to work fom pointing light">
+      <option name="closed" value="true" />
+      <created>1702511102056</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1702511102056</updated>
+    </task>
+    <task id="LOCAL-00004" summary="updated readme">
+      <option name="closed" value="true" />
+      <created>1702511326735</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1702511326735</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VCPKGProject">
-    <isAutomaticEditVcpkgJson value="false" />
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
-    <isAutomaticFoundErrors value="true" />
+    <isAutomaticReloadCMake value="true" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -161,6 +199,25 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="build compatible with home pc + gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="build compatible with home pc + gitignore" />
+    <MESSAGE value="minor tweaks" />
+    <MESSAGE value="Deffered lightning tthhiiisss close to work fom pointing light" />
+    <MESSAGE value="updated readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated readme" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/ImGuiRenderer.cpp</url>
+          <line>314</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/ImGuiRenderer.cpp</url>
+          <line>300</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -198,6 +198,18 @@ ImGuiRenderer::ImGuiRenderer(GLFWwindow* window) : _window(window) {
     glfwSetMouseButtonCallback(_window, mouse_button_callback);
 }
 
+    ImGuiRenderer::ImGuiRenderer(GLFWwindow* window, bool simple) : _window(window) {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
+        _font = create_font();
+
+        glfwSetKeyCallback(_window, key_callback);
+        glfwSetCharCallback(_window, char_callback);
+        glfwSetCursorPosCallback(_window, mouse_pos_callback);
+        glfwSetMouseButtonCallback(_window, mouse_button_callback);
+    }
+
 void ImGuiRenderer::start() {
     auto& io = ImGui::GetIO();
 
@@ -285,7 +297,8 @@ void ImGuiRenderer::render(const ImDrawData* draw_data) {
             glScissor(int(clip_min.x), int(height - clip_max.y), int(clip_max.x - clip_min.x), int(clip_max.y - clip_min.y));
 
             if(Texture* tex = static_cast<Texture*>(cmd.TextureId)) {
-                tex->bind(0);
+                if (tex->getHandle())
+                    tex->bind(0);
             }
 
             glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(ImDrawVert), vertex_offset);

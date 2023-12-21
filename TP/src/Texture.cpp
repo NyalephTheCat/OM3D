@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <filesystem>
 
 namespace OM3D {
 
@@ -23,9 +24,33 @@ Result<TextureData> TextureData::from_file(const std::string& file) {
     const size_t bytes = width * height * 4;
 
     TextureData data;
-    data.size = glm::uvec2(width, height);
-    data.format = ImageFormat::RGBA8_UNORM;
-    data.data = std::make_unique<u8[]>(bytes);
+
+
+    if (channels == 1)
+    {
+        data.size = glm::uvec2(width, height);
+        data.format = ImageFormat::Depth32_FLOAT;
+        data.data = std::make_unique<u8[]>(bytes);
+    }
+    else if (channels == 3)
+    {
+        data.size = glm::uvec2(width, height);
+        data.format = ImageFormat::RGB8_UNORM;
+        data.data = std::make_unique<u8[]>(bytes);
+        for (int i = 0; i < bytes; i += 4)
+        {
+            data.data[i] = img[i];
+            data.data[i + 1] = img[i + 1];
+            data.data[i + 2] = img[i + 2];
+            data.data[i + 3] = 255;
+        }
+    }
+    else if (channels == 4)
+    {
+        data.size = glm::uvec2(width, height);
+        data.format = ImageFormat::RGBA8_UNORM;
+        data.data = std::make_unique<u8[]>(bytes);
+    }
     std::copy_n(img, bytes, data.data.get());
 
     return {true, std::move(data)};
@@ -82,5 +107,33 @@ u32 Texture::mip_levels(glm::uvec2 size) {
     const float side = float(std::max(size.x, size.y));
     return 1 + u32(std::floor(std::log2(side)));
 }
+
+int number_of_file_in_directory(const std::string& directory_name) {
+    int number_of_file = 0;
+    for (auto&& entry : std::filesystem::directory_iterator(directory_name)) {
+        if (entry.status().type() == std::filesystem::file_type::regular)
+            number_of_file++;
+    }
+    return number_of_file;
+}
+
+std::vector<Texture> Texture::loadTextures(const std::string& directory_name, const std::string& extension, float *img_width, float *img_height) {
+    std::vector<Texture> textures;
+    std::string file_name;
+    printf("Loading textures from directory: %s\n", directory_name.c_str());
+    int number_of_file = number_of_file_in_directory(directory_name);
+    printf("Number of files in directory: %d\n", number_of_file);
+    for (int i = 0; i < number_of_file; i++) {
+        file_name = directory_name + "/" + std::to_string(i) + extension;
+        printf("Loading texture: %s\n", file_name.c_str());
+        TextureData data = std::move(TextureData::from_file(file_name).value);
+        Texture texture(data);
+        textures.push_back(std::move(texture));
+        *img_width = data.size.x;
+        *img_height = data.size.y;
+    }
+    return textures;
+}
+
 
 }

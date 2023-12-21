@@ -7,8 +7,8 @@
 
 namespace OM3D {
 
-static constexpr std::string_view shader_path = "../../shaders/";
-static constexpr std::string_view data_path = "../../data/";
+static constexpr std::string_view shader_path = "../shaders/";
+static constexpr std::string_view data_path = "../data/";
 
 class GLHandle : NonCopyable {
     public:
@@ -30,7 +30,7 @@ class GLHandle : NonCopyable {
             std::swap(_handle, other._handle);
         }
 
-        u32 get() const {
+        [[nodiscard]] u32 get() const {
             return _handle;
         }
 

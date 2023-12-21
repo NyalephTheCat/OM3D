@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <memory>
+#include "glad/glad.h"
 
 
 namespace OM3D {
@@ -32,12 +33,16 @@ class Texture {
         Texture(const TextureData& data);
         Texture(const glm::uvec2 &size, ImageFormat format);
 
+        static std::vector<Texture> loadTextures(const std::string& directory_name, const std::string& extension, float *img_width, float *img_height);
+
         void bind(u32 index) const;
         void bind_as_image(u32 index, AccessType access);
 
         const glm::uvec2& size() const;
 
         static u32 mip_levels(glm::uvec2 size);
+
+         [[nodiscard]] u32 getHandle() const { return _handle.get(); }
 
     private:
         friend class Framebuffer;

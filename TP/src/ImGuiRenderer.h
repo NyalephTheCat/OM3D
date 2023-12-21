@@ -13,6 +13,7 @@ namespace OM3D {
 class ImGuiRenderer : NonMovable {
     public:
         ImGuiRenderer(GLFWwindow* window);
+        ImGuiRenderer(GLFWwindow* window, bool simple);
 
         void start();
         void finish();
