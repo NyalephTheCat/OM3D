@@ -11,12 +11,8 @@ template<typename T>
 class TypedBuffer : public ByteBuffer {
     public:
         TypedBuffer() = default;
-
-        TypedBuffer(Span<const T> data) : TypedBuffer(data.data(), data.size()) {
-        }
-
-        TypedBuffer(const T* data, size_t count) : ByteBuffer(data, count * sizeof(T)) {
-        }
+        TypedBuffer(Span<const T> data) : TypedBuffer(data.data(), data.size()) {}
+        TypedBuffer(const T* data, size_t count) : ByteBuffer(data, count * sizeof(T)) {}
 
         size_t element_count() const {
             DEBUG_ASSERT(byte_size() % sizeof(T) == 0);
