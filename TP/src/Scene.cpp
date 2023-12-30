@@ -71,15 +71,15 @@ void Scene::render() const {
     }
     light_buffer.bind(BufferUsage::Storage, 1);
 
-    // Render every object
-    for(const SceneObject& obj : _objects) {
-        // is my object seen ? (inside the camera frustum)
-        if (obj.check_frustum(camera()))
-            obj.render();
-    }
+//    // Render every object
+//    for(const SceneObject& obj : _objects) {
+//        // is my object seen ? (inside the camera frustum)
+//        if (obj.check_frustum(camera()))
+//            obj.render();
+//    }
 
     // failing to instance TwT
-    /*for(const auto& mat : _materials) {
+    for(const auto& mat : _materials) {
         glm::mat4 transforms[MAX_INSTANCE];
         int i = 0;
         SceneObject object_to_instance;
@@ -91,12 +91,14 @@ void Scene::render() const {
         if (i <= 0) continue;
         object_to_instance.setup();
 
-        TypedBuffer<glm::mat4> ssbo(transforms);
-        ssbo.bind(BufferUsage::Storage, 6);
+        TypedBuffer<glm::mat4> ssbo(transforms, i);
+        ssbo.bind(BufferUsage::Storage, 2);
 
 
         glDrawElementsInstanced(GL_TRIANGLES, object_to_instance.index_buffer_count(), GL_UNSIGNED_INT, nullptr, i);
-    }*/
+
+        glDisable(GL_CULL_FACE);
+    }
 
 }
 
