@@ -71,14 +71,16 @@ void Scene::render() {
     }
     _light_buffer.bind(BufferUsage::Storage, 1);
 
-//    // Render every object
-//    for(const SceneObject& obj : _objects) {
-//        // is my object seen ? (inside the camera frustum)
-//        if (obj.check_frustum(camera()))
-//            obj.render();
-//    }
 
-    // failing to instance TwT
+
+    // Render every object
+    for(const SceneObject& obj : _objects) {
+        // is my object seen ? (inside the camera frustum)
+        if (obj.check_frustum(camera()))
+            obj.renderFur();
+    }
+
+    /*// failing to instance TwT
     for(const auto& mat : _materials) {
         glm::mat4 transforms[MAX_INSTANCE];
         int i = 0;
@@ -98,7 +100,7 @@ void Scene::render() {
         glDrawElementsInstanced(GL_TRIANGLES, object_to_instance.index_buffer_count(), GL_UNSIGNED_INT, nullptr, i);
 
         glDisable(GL_CULL_FACE);
-    }
+    }*/
 
 }
 

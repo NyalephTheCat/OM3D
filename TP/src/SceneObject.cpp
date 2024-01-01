@@ -38,6 +38,20 @@ void SceneObject::render() const {
     glDisable(GL_CULL_FACE);
 }
 
+void SceneObject::renderFur() const {
+    if(!_material || !_mesh) {
+        return;
+    }
+
+    _material->set_uniform(HASH("model"), transform());
+    _material->set_backface_culling(true);
+    _material->bind();
+    _mesh->drawFur();
+
+    // Disable backface culling for the rest of the objects
+    glDisable(GL_CULL_FACE);
+}
+
 void SceneObject::set_transform(const glm::mat4& tr) {
     _transform = tr;
 }
