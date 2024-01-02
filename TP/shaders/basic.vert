@@ -14,22 +14,23 @@ layout(location = 2) out vec3 out_color;
 layout(location = 3) out vec3 out_position;
 layout(location = 4) out vec3 out_tangent;
 layout(location = 5) out vec3 out_bitangent;
+layout(location = 6) flat out int instanceID;
 
 layout(binding = 0) uniform Data {
     FrameData frame;
 };
 
 // to make uniform
-int instanceCount = 5;
-float spacing = 1;
-float gravity = 3;
+uniform uint instance_count;
+float spacing = 0.05;
+float gravity = 0;
 
 uniform mat4 model;  // The model matrix, replaced by the instancing data
 
 void main() {
 
-
-    vec4 position = model * vec4(in_pos * spacing * (gl_InstanceID + 1), 1.0);
+    instanceID = gl_InstanceID;
+    vec4 position = model * vec4(in_pos + spacing * (gl_InstanceID + 1), 1.0);
 
     position += vec4(0, -gravity * gl_InstanceID, 0, 0);
 

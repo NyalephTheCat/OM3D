@@ -78,7 +78,7 @@ void StaticMesh::draw() const {
     glDrawElements(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr);
 }
 
-void StaticMesh::drawFur() const {
+void StaticMesh::drawFur(unsigned int instance_count) const {
     _vertex_buffer.bind(BufferUsage::Attribute);
     _index_buffer.bind(BufferUsage::Index);
 
@@ -103,7 +103,7 @@ void StaticMesh::drawFur() const {
         audit_bindings();
     }
 
-    glDrawElementsInstanced(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr, 5);
+    glDrawElementsInstanced(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr, (GLsizei) instance_count);
 }
 
 const SphericalBoundingBox& StaticMesh::bounding_box() const {

@@ -72,12 +72,12 @@ void Scene::render() {
     _light_buffer.bind(BufferUsage::Storage, 1);
 
 
-
+    int instance_count = 20;
     // Render every object
     for(const SceneObject& obj : _objects) {
         // is my object seen ? (inside the camera frustum)
         if (obj.check_frustum(camera()))
-            obj.renderFur();
+            obj.renderFur(instance_count);
     }
 
     /*// failing to instance TwT
