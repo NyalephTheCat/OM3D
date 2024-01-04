@@ -21,6 +21,9 @@ static float delta_time = 0.0f;
 static std::unique_ptr<Scene> scene;
 static std::vector<std::string> scene_files;
 
+// for fur
+
+
 namespace OM3D {
 extern bool audit_bindings_before_draw;
 }
@@ -115,8 +118,6 @@ void gui(ImGuiRenderer& imgui) {
     imgui.start();
     DEFER(imgui.finish());
 
-    // ImGui::ShowDemoWindow();
-
     bool open_scene_popup = false;
     if(ImGui::BeginMainMenuBar()) {
         if(ImGui::BeginMenu("File")) {
@@ -132,15 +133,39 @@ void gui(ImGuiRenderer& imgui) {
             ImGui::EndMenu();
         }
 
-        if(ImGui::BeginMenu("G_buffer")) {
+        if(scene && ImGui::BeginMenu("G_buffer")) {
             if(ImGui::MenuItem("None"))
-                set_g_buffer_mode(0);
+                g_buffer_mode = 0;
             if(ImGui::MenuItem("Albedo"))
-                set_g_buffer_mode(1);
+                g_buffer_mode = 1;
             if(ImGui::MenuItem("Normal"))
-                set_g_buffer_mode(2);
+                g_buffer_mode = 2;
             if(ImGui::MenuItem("Depth"))
-                set_g_buffer_mode(3);
+                g_buffer_mode = 3;
+            ImGui::EndMenu();
+        }
+
+        if(scene && ImGui::BeginMenu("Fur")) {
+            int instance_count = scene->instance_count;
+            float fur_length = scene->fur_length;
+
+            ImGui::SliderInt("instance_count", &instance_count, 0, 100);
+            if (instance_count != scene->instance_count) {
+                scene->instance_count = instance_count;
+                scene->spacing = fur_length / (float) instance_count;
+            }
+            ImGui::SliderFloat("fur_length", &fur_length, 0.0f, 5.0f);
+            if (fur_length != scene->fur_length) {
+                scene->fur_length = fur_length;
+                scene->spacing = fur_length / (float) instance_count;
+            }
+            ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
+            ImGui::SliderFloat("gravity", &scene->gravity, 0.0f, 0.1f);
+//            ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
+            ImGui::ColorEdit3("fur_color", &scene->fur_color.x);
+//            ImGui::SliderFloat("wind_dir_x", &scene->wind_dir.x, -1.0f, 1.0f);
+//            ImGui::SliderFloat("wind_dir_y", &scene->wind_dir.y, -1.0f, 1.0f);
+//            ImGui::SliderFloat("wind_dir_z", &scene->wind_dir.z, -1.0f, 1.0f);
             ImGui::EndMenu();
         }
 
@@ -203,18 +228,15 @@ void gui(ImGuiRenderer& imgui) {
     }
 }
 
-
-
-
 std::unique_ptr<Scene> create_default_scene() {
-    auto scene = std::make_unique<Scene>();
+    auto scene_default = std::make_unique<Scene>();
 
     // Load default cube model
     auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
-    scene = std::move(result.value);
+    scene_default = std::move(result.value);
 
-    scene->set_sun(glm::vec3(0.2f, 1.0f, 0.1f), glm::vec3(1.0f));
+    scene_default->set_sun(glm::vec3(0.2f, 1.0f, 0.1f), glm::vec3(1.0f));
 
     // Add lights
     {
@@ -222,17 +244,17 @@ std::unique_ptr<Scene> create_default_scene() {
         light.set_position(glm::vec3(1.0f, 2.0f, 4.0f));
         light.set_color(glm::vec3(0.0f, 50.0f, 0.0f));
         light.set_radius(100.0f);
-        scene->add_light(std::move(light));
+        scene_default->add_light(light);
     }
     {
         PointLight light;
         light.set_position(glm::vec3(1.0f, 2.0f, -4.0f));
         light.set_color(glm::vec3(50.0f, 0.0f, 0.0f));
         light.set_radius(50.0f);
-        scene->add_light(std::move(light));
+        scene_default->add_light(light);
     }
 
-    return scene;
+    return scene_default;
 }
 
 struct RendererState {
@@ -329,7 +351,9 @@ int main(int argc, char** argv) {
         // Render the scene
         {
             renderer.g_framebuffer.bind();
-            scene->render();
+            auto time = program_time(); // or use delta_time ?
+//            printf("time = %f\n", time);
+            scene->render(time);
         }
 
         if (g_buffer_mode > 0) {

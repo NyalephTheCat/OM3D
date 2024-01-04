@@ -19,6 +19,7 @@ layout(location = 6) flat in int instanceID;
 
 layout(binding = 0) uniform sampler2D in_texture;
 layout(binding = 1) uniform sampler2D in_normal_texture;
+layout(binding = 2) uniform sampler2D in_fur_texture;
 
 layout(binding = 0) uniform Data {
     FrameData frame;
@@ -28,35 +29,36 @@ layout(binding = 1) buffer PointLights {
     PointLight point_lights[];
 };
 
+layout(binding = 2) uniform Fur {
+    FurData fur;
+};
+
 const vec3 ambient = vec3(0.0);
 
 uniform uint instance_count;
-uint fur_density = 10; // nb of hair per unit somewhat
-float hair_width = 0.1; // [0-1]
+float instance_ratio = float(instanceID) / float(instance_count);
 
-bool square_pattern(vec2 TexCoords) {
+float furNoise(vec2 uv, float scale, float threshold) {
+    float x = (uv.x * scale) * 1234.5678f;
+    float y = (uv.y * scale) * 4321.1234f;
+    float z = dot(vec2(x, y), vec2(12.9898f, 78.233f));
+    float noise = fract(sin(z) * 43758.5453f);
+    return step(threshold, noise);
+}
 
-    // marginSize depends on fur_density, hair_width and gl_InstanceID
-//    float marginSize = (hair_width / fur_density) * (1.0 + float(instanceID) / float(instance_count));
-    float marginSize = 0.05;
-
-    vec2 pos = TexCoords / fur_density;
-    vec2 inSquarePos = fract(pos);
-
-    bool inMargin = any(lessThan(inSquarePos, vec2(marginSize)))
-                 || any(greaterThan(inSquarePos, vec2(1.0 - marginSize)));
-    if (inMargin)
-        return false;
-
-    bool inOddSquare = bool(int(floor(pos.x) + floor(pos.y)) % 2);
-    if (inOddSquare)
-        return true;
-    else
-        return false;
+float fur_pattern(vec2 TexCoords) { // varies depending on fur.density
+    float frequency = fur.fur_density * 100 * 2.0 * 3.14159; // Adjust the frequency as needed
+    float pattern = sin(TexCoords.x * frequency) * sin(TexCoords.y * frequency);
+//    return pattern;
+    return step(0.5, pattern); // Convert the pattern to binary (black and white)
 }
 
 float stripe_pattern(vec2 TexCoords) {
-    return sin(100.0 * TexCoords.x) * sin(100.0 * TexCoords.y);
+    return sin(100.0 * TexCoords.x) ;
+}
+
+float thicc_hairs_pattern(vec2 TexCoords) {
+    return sin(fur.fur_density * 300.0 * TexCoords.x) * sin(fur.fur_density * 300.0 * TexCoords.y);
 }
 
 void main() {
@@ -69,17 +71,23 @@ void main() {
     const vec3 normal = in_normal;
     #endif
 
+    if (instanceID == 0) {
+        out_albedo = vec4(0.0, 0.0, 0.0, 1.0);
+        out_normal = vec4(normal * 0.5 + 0.5, 1.0); //
+        return;
+    }
+
     // if fragment is not in the square pattern, discard it
 //    if (square_pattern(in_uv) == true)
 //        discard;
 //    else
 //        out_albedo = vec4(1.0, 1.0, 1.0, 1.0);
 
-    float value = stripe_pattern(in_uv);
-    if (value < 0.2 + 1 * float(instanceID) / float(instance_count))
+    float value = fur_pattern(in_uv);
+    if (value < float(instanceID) / float(instance_count))
         discard;
     else
-        out_albedo = vec4(1.0, 1.0, 1.0, 1.0) * value;
+        out_albedo = vec4(fur.fur_color * instance_ratio, 1.0) * value;
 
 //    out_albedo = vec4(in_color, 1.0);
 

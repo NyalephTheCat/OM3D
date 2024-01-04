@@ -38,14 +38,15 @@ void SceneObject::render() const {
     glDisable(GL_CULL_FACE);
 }
 
-void SceneObject::renderFur(unsigned int instance_count) const {
+void SceneObject::renderFur(unsigned int instance_count, float delta_time) const {
     if(!_material || !_mesh) {
         return;
     }
 
     _material->set_uniform(HASH("model"), transform());
     _material->set_uniform(HASH("instance_count"), instance_count);
-    _material->set_backface_culling(true);
+    _material->set_uniform(HASH("delta_time"), delta_time);
+    _material->set_backface_culling(false);
     _material->bind();
     _mesh->drawFur(instance_count);
 

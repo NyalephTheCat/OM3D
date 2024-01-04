@@ -18,7 +18,7 @@ class SceneObject {
 
         void setup() const;
         void render() const;
-        void renderFur(unsigned int instance_count) const;
+        void renderFur(unsigned int instance_count, float delta_time) const;
 
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;
@@ -29,11 +29,16 @@ class SceneObject {
         SphericalBoundingBox bounding_box() const;
         int index_buffer_count() {return _mesh->index_buffer_count();}
 
+        void setFur(bool isFur) {_isFur = isFur;}
+        bool isFur() const {return _isFur;}
+
     private:
         glm::mat4 _transform = glm::mat4(1.0f);
 
         std::shared_ptr<StaticMesh> _mesh;
         std::shared_ptr<Material> _material;
+
+        bool _isFur = true;
 
 };
 

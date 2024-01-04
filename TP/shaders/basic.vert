@@ -20,19 +20,24 @@ layout(binding = 0) uniform Data {
     FrameData frame;
 };
 
-// to make uniform
-uniform uint instance_count;
-float spacing = 0.05;
-float gravity = 0;
+layout(binding = 2) uniform Fur {
+    FurData fur;
+};
 
 uniform mat4 model;  // The model matrix, replaced by the instancing data
+uniform uint instance_count;
+//uniform float time;
+
+float instance_ratio = float(gl_InstanceID) / float(instance_count);
+
+#define PI 3.1415
 
 void main() {
 
     instanceID = gl_InstanceID;
-    vec4 position = model * vec4(in_pos + spacing * (gl_InstanceID + 1), 1.0);
+    vec4 position = model * vec4(in_pos + in_pos * fur.spacing * (gl_InstanceID + 1), 1.0);
 
-    position += vec4(0, -gravity * gl_InstanceID, 0, 0);
+    position += vec4(0, -fur.gravity * gl_InstanceID, 0, 0);
 
     out_normal = normalize(mat3(model) * in_normal);
     out_tangent = normalize(mat3(model) * in_tangent_bitangent_sign.xyz);

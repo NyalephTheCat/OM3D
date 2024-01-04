@@ -31,6 +31,7 @@ class Texture {
 
         Texture(const TextureData& data);
         Texture(const glm::uvec2 &size, ImageFormat format);
+//        static Texture BlueNoiseTexture(int density, Texture& base);
 
         void bind(u32 index) const;
         void bind_as_image(u32 index, AccessType access);

@@ -22,7 +22,7 @@ class Scene : NonMovable {
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
-        void render();
+        void render(float delta_time = 0.0f);
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
@@ -43,11 +43,17 @@ class Scene : NonMovable {
         float sun_intensity() const { return _sun_intensity; }
         glm::vec3 ambient_color() const { return _ambient_color; }
 
+//        void updateFurDensity(int density);
+
+        unsigned instance_count = 50;
+        float fur_length, fur_density, gravity, wind, spacing;
+        glm::vec3 fur_color{}, wind_dir{};
 
     private:
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;
         std::vector<std::shared_ptr<Material>> _materials;
+//        std::shared_ptr<Texture> _blue_noise_texture;
 
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);
