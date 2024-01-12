@@ -54,7 +54,7 @@ float fur_pattern(vec2 TexCoords) { // varies depending on fur.density
 }
 
 float stripe_pattern(vec2 TexCoords) {
-    return sin(100.0 * TexCoords.x) ;
+    return sin(200.0 * TexCoords.x * fur.fur_density) ;
 }
 
 float thicc_hairs_pattern(vec2 TexCoords) {
@@ -83,7 +83,22 @@ void main() {
 //    else
 //        out_albedo = vec4(1.0, 1.0, 1.0, 1.0);
 
-    float value = fur_pattern(in_uv);
+    float value;
+    switch (fur.fur_type) {
+        case 1:
+            value = fur_pattern(in_uv);
+            break;
+        case 2:
+            value = thicc_hairs_pattern(in_uv);
+            break;
+        case 3:
+            value = stripe_pattern(in_uv);
+            break;
+        default:
+            value = 1;
+            break;
+    }
+
     if (value < float(instanceID) / float(instance_count))
         discard;
     else
@@ -91,9 +106,9 @@ void main() {
 
 //    out_albedo = vec4(in_color, 1.0);
 
-//    #ifdef TEXTURED
-//    out_albedo *= texture(in_texture, in_uv);
-//    #endif
+    #ifdef TEXTURED
+    out_albedo *= texture(in_texture, in_uv);
+    #endif
 
     out_normal = vec4(normal * 0.5 + 0.5, 1.0);
     // depth is already written

@@ -18,7 +18,7 @@ class SceneObject {
 
         void setup() const;
         void render() const;
-        void renderFur(unsigned int instance_count, float delta_time) const;
+        void renderFur(unsigned int instance_count) const;
 
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;

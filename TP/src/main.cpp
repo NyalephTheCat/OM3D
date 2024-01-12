@@ -146,14 +146,15 @@ void gui(ImGuiRenderer& imgui) {
         }
 
         if(scene && ImGui::BeginMenu("Fur")) {
-            int instance_count = scene->instance_count;
+            unsigned instance_count = scene->instance_count;
             float fur_length = scene->fur_length;
 
-            ImGui::SliderInt("instance_count", &instance_count, 0, 100);
+            ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&instance_count), 0, 100);
             if (instance_count != scene->instance_count) {
                 scene->instance_count = instance_count;
                 scene->spacing = fur_length / (float) instance_count;
             }
+            ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
             ImGui::SliderFloat("fur_length", &fur_length, 0.0f, 5.0f);
             if (fur_length != scene->fur_length) {
                 scene->fur_length = fur_length;
@@ -161,11 +162,11 @@ void gui(ImGuiRenderer& imgui) {
             }
             ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
             ImGui::SliderFloat("gravity", &scene->gravity, 0.0f, 0.1f);
-//            ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
+            ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
             ImGui::ColorEdit3("fur_color", &scene->fur_color.x);
-//            ImGui::SliderFloat("wind_dir_x", &scene->wind_dir.x, -1.0f, 1.0f);
-//            ImGui::SliderFloat("wind_dir_y", &scene->wind_dir.y, -1.0f, 1.0f);
-//            ImGui::SliderFloat("wind_dir_z", &scene->wind_dir.z, -1.0f, 1.0f);
+            ImGui::SliderFloat("wind_dir_x", &scene->wind_dir.x, -1.0f, 1.0f);
+            ImGui::SliderFloat("wind_dir_y", &scene->wind_dir.y, -1.0f, 1.0f);
+            ImGui::SliderFloat("wind_dir_z", &scene->wind_dir.z, -1.0f, 1.0f);
             ImGui::EndMenu();
         }
 
@@ -352,7 +353,6 @@ int main(int argc, char** argv) {
         {
             renderer.g_framebuffer.bind();
             auto time = program_time(); // or use delta_time ?
-//            printf("time = %f\n", time);
             scene->render(time);
         }
 

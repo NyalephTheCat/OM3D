@@ -20,6 +20,8 @@ struct FurData {
     float spacing;
     float wind;
     vec3 wind_dir;
+    double time;
+    uint fur_type;
 };
 
 struct PointLight {

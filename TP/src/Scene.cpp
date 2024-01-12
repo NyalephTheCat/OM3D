@@ -12,10 +12,11 @@ Scene::Scene() {
     fur_length = 0.5f;
     fur_density = 0.5f;
     gravity = 0.0f;
-    wind = 0.0f;
+    wind = 0.5f;
     spacing = fur_length / instance_count;
     fur_color = glm::vec3(1.0f);
-    wind_dir = glm::vec3(0.0f);
+    wind_dir = glm::vec3(1.0f, 0.0f, 0.0f);
+    fur_type = 2;
 //    _blue_noise_texture = std::make_shared<Texture>(Texture::BlueNoiseTexture(64)) ;
 }
 
@@ -50,7 +51,7 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
     _sun_color = color;
 }
 
-void Scene::render(float delta_time) {
+void Scene::render(double delta_time) {
     // Fill and bind frame data buffer
     _data_buffer = TypedBuffer<shader::FrameData>(nullptr, 1);
     {
@@ -82,7 +83,7 @@ void Scene::render(float delta_time) {
     {
         auto mapping = fur_buffer.map(AccessType::WriteOnly);
         mapping[0] = {
-                fur_color, fur_length, fur_density, gravity, spacing, wind, wind_dir
+                fur_color, fur_length, fur_density, gravity, spacing, wind, wind_dir, delta_time, fur_type
         };
     }
     fur_buffer.bind(BufferUsage::Uniform, 2);
@@ -92,7 +93,7 @@ void Scene::render(float delta_time) {
         // is my object seen ? (inside the camera frustum)
 //        if (obj.check_frustum(camera()))
         if (obj.isFur())
-            obj.renderFur(instance_count, delta_time);
+            obj.renderFur(instance_count);
         else
             obj.render();
     }
