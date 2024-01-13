@@ -92,7 +92,7 @@ void Scene::render(double delta_time) {
     for(const SceneObject& obj : _objects) {
         // is my object seen ? (inside the camera frustum)
 //        if (obj.check_frustum(camera()))
-        if (obj.isFur())
+        if (fur_type != 0 && obj.isFur())
             obj.renderFur(instance_count);
         else
             obj.render();

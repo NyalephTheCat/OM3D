@@ -71,17 +71,21 @@ void main() {
     const vec3 normal = in_normal;
     #endif
 
+    out_normal = vec4(normal * 0.5 + 0.5, 1.0);
+
+    if (fur.fur_type == 0) {  // no fur
+        out_albedo = vec4(fur.fur_color * in_color, 1.0);
+        #ifdef TEXTURED
+        out_albedo *= texture(in_texture, in_uv);
+        #endif
+        return;
+    }
+
     if (instanceID == 0) {
         out_albedo = vec4(0.0, 0.0, 0.0, 1.0);
         out_normal = vec4(normal * 0.5 + 0.5, 1.0); //
         return;
     }
-
-    // if fragment is not in the square pattern, discard it
-//    if (square_pattern(in_uv) == true)
-//        discard;
-//    else
-//        out_albedo = vec4(1.0, 1.0, 1.0, 1.0);
 
     float value;
     switch (fur.fur_type) {
@@ -104,13 +108,9 @@ void main() {
     else
         out_albedo = vec4(fur.fur_color * instance_ratio, 1.0) * value;
 
-//    out_albedo = vec4(in_color, 1.0);
-
     #ifdef TEXTURED
     out_albedo *= texture(in_texture, in_uv);
     #endif
-
-    out_normal = vec4(normal * 0.5 + 0.5, 1.0);
     // depth is already written
 }
 
