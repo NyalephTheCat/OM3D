@@ -13,7 +13,7 @@ Scene::Scene() {
     fur_density = 0.5f;
     gravity = 0.0f;
     wind = 0.5f;
-    spacing = fur_length / instance_count;
+    spacing = 0.01f;
     fur_color = glm::vec3(1.0f);
     wind_dir = glm::vec3(1.0f, 0.0f, 0.0f);
     fur_type = 2;
@@ -92,8 +92,21 @@ void Scene::render(double delta_time) {
     for(const SceneObject& obj : _objects) {
         // is my object seen ? (inside the camera frustum)
 //        if (obj.check_frustum(camera()))
-        if (fur_type != 0 && obj.isFur())
-            obj.renderFur(instance_count);
+        if (fur_type != 0 && obj.isFur()) {
+            // measure distance from camera to object
+            auto distance = glm::distance(camera().position(), obj.position());
+            // if distance is greater than distance_before_fade, fade the object
+            auto instance_count_ = instance_count;
+            if (distance > _distance_before_fade) {
+                // reduce instance count
+                auto ratio = 1 - (distance - _distance_before_fade) / 10;
+                if (ratio < 0.2f)
+                    ratio = 0.2f;
+                instance_count_ = (unsigned) (instance_count * ratio);
+            }
+
+            obj.renderFur(instance_count_);
+        }
         else
             obj.render();
     }

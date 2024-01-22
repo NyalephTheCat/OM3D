@@ -51,6 +51,8 @@ class Scene : NonMovable {
         glm::vec3 fur_color{}, wind_dir{};
 
     private:
+        float _distance_before_fade = 5.0f;
+
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;
         std::vector<std::shared_ptr<Material>> _materials;

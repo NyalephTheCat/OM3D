@@ -21,6 +21,7 @@ class SceneObject {
         void renderFur(unsigned int instance_count) const;
 
         void set_transform(const glm::mat4& tr);
+        glm::vec3 position() const { return _transform[3]; }
         const glm::mat4& transform() const;
 
         bool check_frustum(const Camera camera) const;

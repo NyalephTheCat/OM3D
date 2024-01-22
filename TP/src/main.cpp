@@ -146,20 +146,11 @@ void gui(ImGuiRenderer& imgui) {
         }
 
         if(scene && ImGui::BeginMenu("Fur")) {
-            unsigned instance_count = scene->instance_count;
-            float fur_length = scene->fur_length;
 
-            ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&instance_count), 0, 100);
-            if (instance_count != scene->instance_count) {
-                scene->instance_count = instance_count;
-                scene->spacing = fur_length / (float) instance_count;
-            }
+            ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&scene->instance_count), 0, 100);
+            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.25f);
             ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
-            ImGui::SliderFloat("fur_length", &fur_length, 0.0f, 5.0f);
-            if (fur_length != scene->fur_length) {
-                scene->fur_length = fur_length;
-                scene->spacing = fur_length / (float) instance_count;
-            }
+            ImGui::SliderFloat("fur_length", &scene->fur_length, 0.0f, 5.0f);
             ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
             ImGui::SliderFloat("gravity", &scene->gravity, 0.0f, 0.1f);
             ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
