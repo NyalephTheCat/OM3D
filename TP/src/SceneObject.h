@@ -16,23 +16,30 @@ class SceneObject {
     public:
         SceneObject(std::shared_ptr<StaticMesh> mesh = nullptr, std::shared_ptr<Material> material = nullptr);
 
+        void setup() const;
         void render() const;
+        void renderFur(unsigned int instance_count) const;
 
         void set_transform(const glm::mat4& tr);
+        glm::vec3 position() const { return _transform[3]; }
         const glm::mat4& transform() const;
 
         bool check_frustum(const Camera camera) const;
         std::shared_ptr<Material> material() const { return _material; }
 
         SphericalBoundingBox bounding_box() const;
-        void setup() const;
         int index_buffer_count() {return _mesh->index_buffer_count();}
+
+        void setFur(bool isFur) {_isFur = isFur;}
+        bool isFur() const {return _isFur;}
 
     private:
         glm::mat4 _transform = glm::mat4(1.0f);
 
         std::shared_ptr<StaticMesh> _mesh;
         std::shared_ptr<Material> _material;
+
+        bool _isFur = true;
 
 };
 

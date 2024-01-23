@@ -14,21 +14,31 @@ layout(location = 2) out vec3 out_color;
 layout(location = 3) out vec3 out_position;
 layout(location = 4) out vec3 out_tangent;
 layout(location = 5) out vec3 out_bitangent;
+layout(location = 6) flat out int instanceID;
 
 layout(binding = 0) uniform Data {
     FrameData frame;
 };
 
-layout(location = 2) readonly buffer instances
-{
-    mat4 instanceMatrix;
-};// The instancing data
+layout(binding = 2) uniform Fur {
+    FurData fur;
+};
 
 uniform mat4 model;  // The model matrix, replaced by the instancing data
+uniform uint instance_count;
+
+float instance_ratio = float(gl_InstanceID) / float(instance_count);
+
+#define PI 3.1415
 
 void main() {
-//    const mat4 model = instanceMatrix[gl_InstanceID];
-    const vec4 position = model * vec4(in_pos, 1.0);
+
+    instanceID = gl_InstanceID;
+//    vec4 position = model * vec4((in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)) * sin(time), 1.0);
+    vec3 wind_displacement = fur.wind_dir * ( (gl_InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - gl_InstanceID * 0.1f * fur.wind) );
+    vec4 position = model * vec4(in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)
+                                        + wind_displacement, 1.0);
+    position += vec4(0, -fur.gravity * gl_InstanceID, 0, 0);
 
     out_normal = normalize(mat3(model) * in_normal);
     out_tangent = normalize(mat3(model) * in_tangent_bitangent_sign.xyz);

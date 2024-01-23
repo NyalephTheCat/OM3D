@@ -8,6 +8,16 @@
 namespace OM3D {
 
 Scene::Scene() {
+    instance_count = 50;
+    fur_length = 0.5f;
+    fur_density = 0.5f;
+    gravity = 0.0f;
+    wind = 0.5f;
+    spacing = 0.01f;
+    fur_color = glm::vec3(1.0f);
+    wind_dir = glm::vec3(1.0f, 0.0f, 0.0f);
+    fur_type = 2;
+//    _blue_noise_texture = std::make_shared<Texture>(Texture::BlueNoiseTexture(64)) ;
 }
 
 void Scene::add_object(SceneObject obj) {
@@ -41,9 +51,7 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
     _sun_color = color;
 }
 
-#define MAX_INSTANCE 100
-
-void Scene::render() {
+void Scene::render(double delta_time) {
     // Fill and bind frame data buffer
     _data_buffer = TypedBuffer<shader::FrameData>(nullptr, 1);
     {
@@ -71,35 +79,47 @@ void Scene::render() {
     }
     _light_buffer.bind(BufferUsage::Storage, 1);
 
-//    // Render every object
-//    for(const SceneObject& obj : _objects) {
-//        // is my object seen ? (inside the camera frustum)
+    auto fur_buffer = TypedBuffer<shader::FurData>(nullptr, 1);
+    {
+        auto mapping = fur_buffer.map(AccessType::WriteOnly);
+        mapping[0] = {
+                fur_color, fur_length, fur_density, gravity, spacing, wind, wind_dir, delta_time, fur_type
+        };
+    }
+    fur_buffer.bind(BufferUsage::Uniform, 2);
+
+    // Render every object
+    for(const SceneObject& obj : _objects) {
+        // is my object seen ? (inside the camera frustum)
 //        if (obj.check_frustum(camera()))
-//            obj.render();
-//    }
+        if (fur_type != 0 && obj.isFur()) {
+            // measure distance from camera to object
+            auto distance = glm::distance(camera().position(), obj.position());
+            // if distance is greater than distance_before_fade, fade the object
+            auto instance_count_ = instance_count;
+            if (distance > _distance_before_fade) {
+                // reduce instance count
+                auto ratio = 1 - (distance - _distance_before_fade) / 10;
+                if (ratio < 0.2f)
+                    ratio = 0.2f;
+                instance_count_ = (unsigned) (instance_count * ratio);
+            }
 
-    // failing to instance TwT
-    for(const auto& mat : _materials) {
-        glm::mat4 transforms[MAX_INSTANCE];
-        int i = 0;
-        SceneObject object_to_instance;
-        for (const SceneObject& obj : _objects) {
-            if (!obj.check_frustum(camera()) || obj.material() != mat) continue;
-            transforms[i++] = obj.transform();
-            object_to_instance = obj;
+            obj.renderFur(instance_count_);
         }
-        if (i <= 0) continue;
-        object_to_instance.setup();
-
-        TypedBuffer<glm::mat4> ssbo(transforms, i);
-        ssbo.bind(BufferUsage::Storage, 2);
-
-
-        glDrawElementsInstanced(GL_TRIANGLES, object_to_instance.index_buffer_count(), GL_UNSIGNED_INT, nullptr, i);
-
-        glDisable(GL_CULL_FACE);
+        else
+            obj.render();
     }
 
 }
+
+//void Scene::updateFurDensity(int density) {
+//    *_blue_noise_texture = Texture::BlueNoiseTexture(density);
+//
+//    for (auto& obj : _objects) {
+//        if (obj.isFur())
+//            obj.material()->set_texture(2, _blue_noise_texture);
+//    }
+//}
 
 }

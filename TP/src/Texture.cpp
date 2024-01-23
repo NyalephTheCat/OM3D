@@ -83,4 +83,10 @@ u32 Texture::mip_levels(glm::uvec2 size) {
     return 1 + u32(std::floor(std::log2(side)));
 }
 
+//Texture Texture::BlueNoiseTexture(int density, Texture& base) { // generates a blue noise texture with format and size of base
+//    TextureData data; // where we generate the texture with blue noise
+//
+//
+//}
+
 }

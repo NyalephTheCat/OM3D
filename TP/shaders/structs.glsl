@@ -12,6 +12,18 @@ struct FrameData {
     float padding_1;
 };
 
+struct FurData {
+    vec3 fur_color;
+    float fur_length;
+    float fur_density;
+    float gravity;
+    float spacing;
+    float wind;
+    vec3 wind_dir;
+    double time;
+    uint fur_type;
+};
+
 struct PointLight {
     vec3 position;
     float radius;

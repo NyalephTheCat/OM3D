@@ -35,6 +35,7 @@ class StaticMesh : NonCopyable {
 
         void setup() const;
         void draw() const;
+        void drawFur(unsigned int instance_count) const;
         int index_buffer_count() {return int(_index_buffer.element_count());}
 
     private:

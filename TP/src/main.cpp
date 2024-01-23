@@ -106,16 +106,9 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
 
 u32 g_buffer_mode = 0;  // 0: none, 1: albedo, 2: normal, 3: depth
 
-void set_g_buffer_mode(u32 mode) {
-    g_buffer_mode = mode;
-    printf("g_buffer_mode = %d\n", g_buffer_mode);
-}
-
 void gui(ImGuiRenderer& imgui) {
     imgui.start();
     DEFER(imgui.finish());
-
-    // ImGui::ShowDemoWindow();
 
     bool open_scene_popup = false;
     if(ImGui::BeginMainMenuBar()) {
@@ -132,15 +125,31 @@ void gui(ImGuiRenderer& imgui) {
             ImGui::EndMenu();
         }
 
-        if(ImGui::BeginMenu("G_buffer")) {
+        if(scene && ImGui::BeginMenu("G_buffer")) {
             if(ImGui::MenuItem("None"))
-                set_g_buffer_mode(0);
+                g_buffer_mode = 0;
             if(ImGui::MenuItem("Albedo"))
-                set_g_buffer_mode(1);
+                g_buffer_mode = 1;
             if(ImGui::MenuItem("Normal"))
-                set_g_buffer_mode(2);
+                g_buffer_mode = 2;
             if(ImGui::MenuItem("Depth"))
-                set_g_buffer_mode(3);
+                g_buffer_mode = 3;
+            ImGui::EndMenu();
+        }
+
+        if(scene && ImGui::BeginMenu("Fur")) {
+
+            ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&scene->instance_count), 0, 100);
+            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.05f);
+            ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
+            ImGui::SliderFloat("fur_length", &scene->fur_length, 0.0f, 5.0f);
+            ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
+            ImGui::SliderFloat("gravity", &scene->gravity, 0.0f, 0.1f);
+            ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
+            ImGui::ColorEdit3("fur_color", &scene->fur_color.x);
+            ImGui::SliderFloat("wind_dir_x", &scene->wind_dir.x, -1.0f, 1.0f);
+            ImGui::SliderFloat("wind_dir_y", &scene->wind_dir.y, -1.0f, 1.0f);
+            ImGui::SliderFloat("wind_dir_z", &scene->wind_dir.z, -1.0f, 1.0f);
             ImGui::EndMenu();
         }
 
@@ -203,18 +212,15 @@ void gui(ImGuiRenderer& imgui) {
     }
 }
 
-
-
-
 std::unique_ptr<Scene> create_default_scene() {
-    auto scene = std::make_unique<Scene>();
+    auto scene_default = std::make_unique<Scene>();
 
     // Load default cube model
     auto result = Scene::from_gltf(std::string(data_path) + "cube.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
-    scene = std::move(result.value);
+    scene_default = std::move(result.value);
 
-    scene->set_sun(glm::vec3(0.2f, 1.0f, 0.1f), glm::vec3(1.0f));
+    scene_default->set_sun(glm::vec3(0.2f, 1.0f, 0.1f), glm::vec3(1.0f));
 
     // Add lights
     {
@@ -222,17 +228,17 @@ std::unique_ptr<Scene> create_default_scene() {
         light.set_position(glm::vec3(1.0f, 2.0f, 4.0f));
         light.set_color(glm::vec3(0.0f, 50.0f, 0.0f));
         light.set_radius(100.0f);
-        scene->add_light(std::move(light));
+        scene_default->add_light(light);
     }
     {
         PointLight light;
         light.set_position(glm::vec3(1.0f, 2.0f, -4.0f));
         light.set_color(glm::vec3(50.0f, 0.0f, 0.0f));
         light.set_radius(50.0f);
-        scene->add_light(std::move(light));
+        scene_default->add_light(light);
     }
 
-    return scene;
+    return scene_default;
 }
 
 struct RendererState {
@@ -339,7 +345,8 @@ int main(int argc, char** argv) {
         // Render the scene
         {
             renderer.g_framebuffer.bind();
-            scene->render();
+            auto time = program_time(); // or use delta_time ?
+            scene->render(time);
         }
 
         if (g_buffer_mode > 0) {
