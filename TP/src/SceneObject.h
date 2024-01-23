@@ -17,8 +17,8 @@ class SceneObject {
         SceneObject(std::shared_ptr<StaticMesh> mesh = nullptr, std::shared_ptr<Material> material = nullptr);
 
         void setup() const;
-        void render() const;
-        void renderFur(unsigned int instance_count) const;
+        void render(unsigned char render_mode = 0, bool left_eye = false, float IPD = 0.f) const;
+        void renderFur(unsigned int instance_countunsigned, unsigned char render_mode = 0, bool left_eye = false, float IPD = 0.f) const;
 
         void set_transform(const glm::mat4& tr);
         glm::vec3 position() const { return _transform[3]; }

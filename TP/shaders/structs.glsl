@@ -1,5 +1,7 @@
 struct CameraData {
     mat4 view_proj;
+    mat4 view;
+    mat4 proj;
 };
 
 struct FrameData {

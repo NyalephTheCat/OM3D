@@ -22,7 +22,7 @@ class Scene : NonMovable {
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
-        void render(double delta_time = 0.0f);
+        void render(double delta_time = 0.0f, unsigned char stereo_mode = 0, bool left_eye = true);
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
@@ -49,6 +49,9 @@ class Scene : NonMovable {
         unsigned fur_type = 0;
         float fur_length, fur_density, gravity, wind, spacing;
         glm::vec3 fur_color{}, wind_dir{};
+
+        float eye_separation = 0.0f;
+        float focal_length = 0.1f;
 
     private:
         float _distance_before_fade = 5.0f;

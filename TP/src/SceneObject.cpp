@@ -24,12 +24,15 @@ void SceneObject::setup() const {
     _mesh->setup();
 }
 
-void SceneObject::render() const {
+void SceneObject::render(unsigned char render_mode, bool left_eye, float IPD) const {
     if(!_material || !_mesh) {
         return;
     }
 
     _material->set_uniform(HASH("model"), transform());
+    _material->set_uniform(HASH("render_mode"), (u32) render_mode);
+    _material->set_uniform(HASH("left_eye"), (u32)left_eye);
+    _material->set_uniform(HASH("IPD"), IPD);
     _material->set_backface_culling(true);
     _material->bind();
     _mesh->draw();
@@ -38,13 +41,16 @@ void SceneObject::render() const {
     glDisable(GL_CULL_FACE);
 }
 
-void SceneObject::renderFur(unsigned int instance_count) const {
+void SceneObject::renderFur(unsigned int instance_count, unsigned char render_mode, bool left_eye, float IPD) const {
     if(!_material || !_mesh) {
         return;
     }
 
     _material->set_uniform(HASH("model"), transform());
     _material->set_uniform(HASH("instance_count"), instance_count);
+    _material->set_uniform(HASH("render_mode"), (u32) render_mode);
+    _material->set_uniform(HASH("left_eye"), (u32)left_eye);
+    _material->set_uniform(HASH("IPD"), IPD);
     _material->set_backface_culling(false);
     _material->bind();
     _mesh->drawFur(instance_count);

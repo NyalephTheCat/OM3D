@@ -26,6 +26,8 @@ layout(binding = 2) uniform Fur {
 
 uniform mat4 model;  // The model matrix, replaced by the instancing data
 uniform uint instance_count;
+uniform uint render_mode;
+uniform uint left_eye;
 
 float instance_ratio = float(gl_InstanceID) / float(instance_count);
 
@@ -48,6 +50,22 @@ void main() {
     out_color = in_color;
     out_position = position.xyz;
 
+    /*mat4 view = frame.camera.view;
+
+    if (render_mode > 0){
+        if (left_eye == 0)
+            view = mat4(1.0, 0.0, 0.0, IPD,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                0.0, 0.0, 0.0, 1.0) * view;
+        else
+            view = mat4(1.0, 0.0, 0.0, -IPD,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                0.0, 0.0, 0.0, 1.0) * view;
+    }*/
+
+//    gl_Position = frame.camera.proj * view * position;
     gl_Position = frame.camera.view_proj * position;
 }
 
