@@ -21,9 +21,6 @@ static float delta_time = 0.0f;
 static std::unique_ptr<Scene> scene;
 static std::vector<std::string> scene_files;
 
-// for fur
-
-
 namespace OM3D {
 extern bool audit_bindings_before_draw;
 }
@@ -109,11 +106,6 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
 
 u32 g_buffer_mode = 0;  // 0: none, 1: albedo, 2: normal, 3: depth
 
-void set_g_buffer_mode(u32 mode) {
-    g_buffer_mode = mode;
-    printf("g_buffer_mode = %d\n", g_buffer_mode);
-}
-
 void gui(ImGuiRenderer& imgui) {
     imgui.start();
     DEFER(imgui.finish());
@@ -148,7 +140,7 @@ void gui(ImGuiRenderer& imgui) {
         if(scene && ImGui::BeginMenu("Fur")) {
 
             ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&scene->instance_count), 0, 100);
-            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.25f);
+            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.05f);
             ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
             ImGui::SliderFloat("fur_length", &scene->fur_length, 0.0f, 5.0f);
             ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
