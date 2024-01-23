@@ -416,20 +416,21 @@ int main(int argc, char** argv) {
         renderer.albedo_texture_left.bind(0);
         renderer.normal_texture_left.bind(1);
         renderer.depth_texture_left.bind(2);
+        if (stereo_mode > 0) {
+            renderer.albedo_texture_right.bind(3);
+            renderer.normal_texture_right.bind(4);
+            renderer.depth_texture_right.bind(5);
+        }
 
         // uniform
         sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
         sun_lightning_program->set_uniform(HASH("sun_color"), scene->sun_color());
         sun_lightning_program->set_uniform(HASH("sun_intensity"), scene->sun_intensity());
         sun_lightning_program->set_uniform(HASH("ambient_color"), scene->ambient_color());
+        sun_lightning_program->set_uniform(HASH("stereo_mode"), (u32)stereo_mode);
+        sun_lightning_program->set_uniform(HASH("resolution"), renderer.size);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        if (stereo_mode > 0)
-        {
-
-        }
-
         // Blit display result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         renderer.lighting_framebuffer.blit();

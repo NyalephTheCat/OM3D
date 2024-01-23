@@ -12,7 +12,7 @@ uniform uint stereo_mode;
 uniform vec2 resolution;
 
 void main() {
-    bool stereo = bool(stereo_mode > 0);
+    bool stereo = bool(stereo_mode);
 
     const ivec2 coord = ivec2(gl_FragCoord.xy);
 
