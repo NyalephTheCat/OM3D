@@ -242,15 +242,20 @@ struct RendererState {
         state.size = size;
 
         if(state.size.x > 0 && state.size.y > 0) {
-            state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT);
-            state.albedo_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-            state.normal_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-            state.display_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.lighting_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.depth_texture_left = Texture(size, ImageFormat::Depth32_FLOAT);
+            state.depth_texture_right = Texture(size, ImageFormat::Depth32_FLOAT);
+            state.albedo_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.albedo_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.normal_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.normal_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.display_texture_left = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.display_texture_right = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.lighting_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.lighting_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
 //            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.g_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.albedo_texture, &state.normal_texture});
-            state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture});
-            state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture});
+            state.g_framebuffer = Framebuffer(&state.depth_texture_left, std::array{&state.albedo_texture_left, &state.normal_texture_left}); //, &state.depth_texture_right, &state.albedo_texture_right, &state.normal_texture_right});
+            state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture_left, &state.display_texture_right});
+            state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture_left, &state.lighting_texture_right});
 //            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
         }
 
@@ -259,11 +264,16 @@ struct RendererState {
 
     glm::uvec2 size = {};
 
-    Texture depth_texture;
-    Texture albedo_texture;
-    Texture normal_texture;
-    Texture display_texture;
-    Texture lighting_texture;
+    Texture depth_texture_left;
+    Texture depth_texture_right;
+    Texture albedo_texture_left;
+    Texture albedo_texture_right;
+    Texture normal_texture_left;
+    Texture normal_texture_right;
+    Texture display_texture_left;
+    Texture display_texture_right;
+    Texture lighting_texture_left;
+    Texture lighting_texture_right;
 //    Texture tone_mapped_texture;
 
     Framebuffer g_framebuffer;
@@ -338,9 +348,9 @@ int main(int argc, char** argv) {
 
             // set uniform value g_buffer_mode
             g_buffer_program->set_uniform(HASH("g_buffer_mode"), g_buffer_mode);
-            renderer.albedo_texture.bind(0);
-            renderer.normal_texture.bind(1);
-            renderer.depth_texture.bind(2);
+            renderer.albedo_texture_left.bind(0);
+            renderer.normal_texture_left.bind(1);
+            renderer.depth_texture_left.bind(2);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
             // Blit display result to screen
@@ -357,9 +367,9 @@ int main(int argc, char** argv) {
         renderer.lighting_framebuffer.bind();
         sun_lightning_program->bind();
 
-        renderer.albedo_texture.bind(0);
-        renderer.normal_texture.bind(1);
-        renderer.depth_texture.bind(2);
+        renderer.albedo_texture_left.bind(0);
+        renderer.normal_texture_left.bind(1);
+        renderer.depth_texture_left.bind(2);
 
         // uniform
         sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
