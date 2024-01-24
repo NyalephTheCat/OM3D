@@ -122,6 +122,18 @@ void Camera::update() {
     _view_proj = _projection * _view;
 }
 
+Frustum Camera::build_frustum_WS() const { // returns frustum in world space of a camera
+    glm::mat4 viewProjMatrix = _view_proj;
+    glm::mat4 invViewProjMatrix = glm::inverse(viewProjMatrix);
+    Frustum frustum;
+    frustum._near_normal = glm::normalize(glm::vec3(invViewProjMatrix[2]));
+    frustum._top_normal = glm::normalize(glm::vec3(invViewProjMatrix[1] + invViewProjMatrix[2]));
+    frustum._bottom_normal = glm::normalize(glm::vec3(invViewProjMatrix[2] - invViewProjMatrix[1]));
+    frustum._right_normal = glm::normalize(glm::vec3(invViewProjMatrix[0] - invViewProjMatrix[2]));
+    frustum._left_normal = glm::normalize(glm::vec3(invViewProjMatrix[2] + invViewProjMatrix[0]));
+    return frustum;
+}
+
 Frustum Camera::build_frustum() const {
     const glm::vec3 camera_forward = forward();
     const glm::vec3 camera_up = up();

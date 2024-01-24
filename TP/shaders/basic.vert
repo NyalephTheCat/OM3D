@@ -28,20 +28,30 @@ uniform mat4 model;  // The model matrix, replaced by the instancing data
 uniform uint instance_count;
 uniform uint render_mode;
 uniform uint left_eye;
-uniform float IPD;
-
-float instance_ratio = float(gl_InstanceID) / float(instance_count);
 
 #define PI 3.1415
 
 void main() {
 
-    instanceID = gl_InstanceID;
-//    vec4 position = model * vec4((in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)) * sin(time), 1.0);
-    vec3 wind_displacement = fur.wind_dir * ( (gl_InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - gl_InstanceID * 0.1f * fur.wind) );
-    vec4 position = model * vec4(in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)
-                                        + wind_displacement, 1.0);
-    position += vec4(0, -fur.gravity * gl_InstanceID, 0, 0);
+    int InstanceID = gl_InstanceID;
+    if (render_mode == 2)
+        InstanceID = InstanceID / 2;
+    float instance_ratio = float(InstanceID) / float(instance_count);
+    vec4 position;
+
+    if (fur.fur_type != 0)
+    {
+        vec3 wind_displacement = fur.wind_dir * ((InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - InstanceID * 0.1f * fur.wind));
+
+        position = model * vec4(in_pos + in_pos * fur.spacing * (InstanceID + 1)
+        + wind_displacement, 1.0);
+
+        position += vec4(0, -fur.gravity * InstanceID, 0, 0);
+    }
+    else
+    {
+        position = model * vec4(in_pos, 1.0);
+    }
 
     out_normal = normalize(mat3(model) * in_normal);
     out_tangent = normalize(mat3(model) * in_tangent_bitangent_sign.xyz);
@@ -51,10 +61,39 @@ void main() {
     out_color = in_color;
     out_position = position.xyz;
 
-    float offset = 0.0;
-    if (render_mode > 0)
-        offset = bool(left_eye) ? -IPD : IPD;
-
-    gl_Position = frame.camera.view_proj * position + vec4(offset, 0, 0, 0);
+    switch (render_mode)
+    {
+        case 0:
+            gl_Position = frame.camera.view_proj * position;
+            break;
+        case 1:
+            if (bool(left_eye))
+                gl_Position = frame.camera.view_proj_left * position;
+            else
+                gl_Position = frame.camera.view_proj_right * position;
+            break;
+        case 2:
+            if (gl_InstanceID % 2 == 0)
+            {
+                vec4 position_CS = frame.camera.view_proj_left * position;
+                vec4 vPosNDC = position_CS/position_CS.w; //...and further to NDC
+                float xNew = (vPosNDC.x - 1.0) / 2.0; //X from [-1,1] to [-1,0]
+                vPosNDC.x = xNew;
+                gl_Position = vPosNDC*position_CS.w; //Transform back to CS
+                //Additional clip plane to the right
+                gl_ClipDistance[0] = dot(position, frame.camera.left_eye_right_plane_WS);
+            }
+            else
+            {
+                vec4 position_CS = frame.camera.view_proj_right * position;
+                vec4 vPosNDC = position_CS/position_CS.w; //...and further to NDC
+                float xNew = (vPosNDC.x + 1.0) / 2.0; //X from [-1,1] to [0,1]
+                vPosNDC.x = xNew;
+                gl_Position = vPosNDC*position_CS.w; //Transform back to CS
+                //Additional clip plane to the left
+                gl_ClipDistance[0] = dot(position, frame.camera.right_eye_left_plane_WS);
+            }
+            break;
+    }
 }
 

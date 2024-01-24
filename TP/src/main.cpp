@@ -157,9 +157,8 @@ void gui(ImGuiRenderer& imgui) {
         }
 
         if(scene && ImGui::BeginMenu("Stereo")) {
-            ImGui::SliderInt("stereo_mode", (int*) &stereo_mode, 0, 3);
-            ImGui::SliderFloat("eye_separation", &scene->eye_separation, 0.0f, 2.f);
-            ImGui::SliderFloat("focal_length", &scene->focal_length, 0.0f, 0.1f);
+            ImGui::SliderInt("stereo_mode", (int*) &stereo_mode, 0, 2);
+            ImGui::SliderFloat("eye_separation", &scene->eye_separation, 0.0f, 3.f);
             ImGui::EndMenu();
         }
 
@@ -270,7 +269,7 @@ struct RendererState {
             state.lighting_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
             state.lighting_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
 //            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.g_framebuffer = Framebuffer(&state.depth_texture_left, std::array{&state.albedo_texture_left, &state.normal_texture_left, &state.depth_texture_right, &state.albedo_texture_right, &state.normal_texture_right});
+            state.g_framebuffer = Framebuffer(&state.depth_texture_left, std::array{&state.albedo_texture_left, &state.normal_texture_left}); //, &state.depth_texture_right, &state.albedo_texture_right, &state.normal_texture_right});
             state.g_framebuffer_right = Framebuffer(&state.depth_texture_right2, std::array{&state.albedo_texture_right, &state.normal_texture_right});
             state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture_left, &state.display_texture_right});
             state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture_left, &state.lighting_texture_right});
@@ -348,6 +347,9 @@ int main(int argc, char** argv) {
             if(renderer.size != glm::uvec2(width, height)) {
                 renderer = RendererState::create(glm::uvec2(width, height));
             }
+            // to use with nvidia stereo for viewport separation, now to find where
+        //    glViewportIndexedf(0, 0, 0, width / 2, height);
+        //    glViewportIndexedf(1, width / 2, 0, width / 2, height);
         }
 
         update_delta_time();
@@ -360,12 +362,14 @@ int main(int argc, char** argv) {
         {
             renderer.g_framebuffer.bind();
             auto time = program_time(); // or use delta_time ?
-            if (stereo_mode > 0) {
+            if (stereo_mode != 1) {
+                scene->render(time, stereo_mode);
+            }
+            else {
                 scene->render(time, stereo_mode, true);
                 renderer.g_framebuffer_right.bind();
                 scene->render(time, stereo_mode, false);
-            } else
-                scene->render(time);
+            }
         }
 
         if (g_buffer_mode > 0) {
@@ -379,19 +383,19 @@ int main(int argc, char** argv) {
             switch (g_buffer_mode) {
                 case 1:
                     renderer.albedo_texture_left.bind(0);
-                    if (stereo_mode > 0)
+                    if (stereo_mode == 1)
                         renderer.albedo_texture_right.bind(1);
                     break;
                 case 2:
                     renderer.normal_texture_left.bind(0);
-                    if (stereo_mode > 0)
+                    if (stereo_mode == 1)
                         renderer.normal_texture_right.bind(1);
                     break;
                 case 3:
                     renderer.depth_texture_left.bind(0);
                     if (stereo_mode == 1)
                         renderer.depth_texture_right2.bind(1);
-                    if (stereo_mode > 1)
+                    if (stereo_mode == 1)
                         renderer.depth_texture_right.bind(1);
                     break;
                 default:
@@ -416,7 +420,7 @@ int main(int argc, char** argv) {
         renderer.albedo_texture_left.bind(0);
         renderer.normal_texture_left.bind(1);
         renderer.depth_texture_left.bind(2);
-        if (stereo_mode > 0) {
+        if (stereo_mode == 1) {
             renderer.albedo_texture_right.bind(3);
             renderer.normal_texture_right.bind(4);
             renderer.depth_texture_right.bind(5);

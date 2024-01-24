@@ -30,8 +30,7 @@ layout(binding = 2) uniform Fur {
 uniform mat4 model;  // The model matrix, replaced by the instancing data
 uniform uint instance_count;
 uniform uint render_mode;
-//uniform uint left_eye;
-uniform float IPD;
+uniform uint left_eye;
 
 float instance_ratio = float(gl_InstanceID) / float(instance_count);
 
@@ -40,7 +39,6 @@ float instance_ratio = float(gl_InstanceID) / float(instance_count);
 void main() {
 
     instanceID = gl_InstanceID;
-//    vec4 position = model * vec4((in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)) * sin(time), 1.0);
     vec3 wind_displacement = fur.wind_dir * ( (gl_InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - gl_InstanceID * 0.1f * fur.wind) );
     vec4 position = model * vec4(in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)
                                         + wind_displacement, 1.0);
@@ -54,9 +52,24 @@ void main() {
     out_color = in_color;
     out_position = position.xyz;
 
-    gl_Position = frame.camera.view_proj * position - vec4(IPD, 0, 0, 0);
-    gl_SecondaryPositionNV = frame.camera.view_proj * position + vec4(IPD, 0, 0, 0);
-    gl_ViewportMask[0] = 1; // Use the first viewport for the primary view
-    gl_SecondaryViewportMaskNV[0] = 2; // Use the first two viewports for the secondary view
+    switch (render_mode)
+    {
+        case 0:
+            gl_Position = frame.camera.view_proj * position;
+            return;
+        case 1:
+            if (bool(left_eye))
+                gl_Position = frame.camera.view_proj_left * position;
+            else
+                gl_Position = frame.camera.view_proj_right * position;
+            return;
+        case 2:
+            gl_Position = frame.camera.view_proj_left * position;
+            gl_SecondaryPositionNV = frame.camera.view_proj_right * position;
+            gl_ViewportMask[0] = 1; // Use the first viewport for the primary view
+            gl_SecondaryViewportMaskNV[0] = 2; // Use the first two viewports for the secondary view
+            return;
+    }
+
 }
 

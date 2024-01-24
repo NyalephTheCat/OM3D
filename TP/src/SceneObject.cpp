@@ -24,7 +24,7 @@ void SceneObject::setup() const {
     _mesh->setup();
 }
 
-void SceneObject::render(unsigned char render_mode, bool left_eye, float IPD) const {
+void SceneObject::render(unsigned char render_mode, bool left_eye) const {
     if(!_material || !_mesh) {
         return;
     }
@@ -32,16 +32,18 @@ void SceneObject::render(unsigned char render_mode, bool left_eye, float IPD) co
     _material->set_uniform(HASH("model"), transform());
     _material->set_uniform(HASH("render_mode"), (u32) render_mode);
     _material->set_uniform(HASH("left_eye"), (u32)left_eye);
-    _material->set_uniform(HASH("IPD"), IPD);
     _material->set_backface_culling(true);
     _material->bind();
-    _mesh->draw();
+    if (render_mode == 2)
+        _mesh->drawInstancedStereo();
+    else
+        _mesh->draw();
 
     // Disable backface culling for the rest of the objects
     glDisable(GL_CULL_FACE);
 }
 
-void SceneObject::renderFur(unsigned int instance_count, unsigned char render_mode, bool left_eye, float IPD) const {
+void SceneObject::renderFur(unsigned int instance_count, unsigned char render_mode, bool left_eye) const {
     if(!_material || !_mesh) {
         return;
     }
@@ -50,7 +52,6 @@ void SceneObject::renderFur(unsigned int instance_count, unsigned char render_mo
     _material->set_uniform(HASH("instance_count"), instance_count);
     _material->set_uniform(HASH("render_mode"), (u32) render_mode);
     _material->set_uniform(HASH("left_eye"), (u32)left_eye);
-    _material->set_uniform(HASH("IPD"), IPD);
     _material->set_backface_culling(false);
     _material->bind();
     _mesh->drawFur(instance_count);

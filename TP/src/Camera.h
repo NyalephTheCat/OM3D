@@ -44,6 +44,7 @@ class Camera {
         float ratio() const;
 
         Frustum build_frustum() const;
+        Frustum build_frustum_WS() const;
 
     private:
         void update();

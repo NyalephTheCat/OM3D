@@ -45,13 +45,11 @@ class Scene : NonMovable {
 
 //        void updateFurDensity(int density);
 
-        unsigned instance_count = 50;
-        unsigned fur_type = 0;
+        unsigned instance_count, fur_type;
         float fur_length, fur_density, gravity, wind, spacing;
         glm::vec3 fur_color{}, wind_dir{};
 
-        float eye_separation = 0.0f;
-        float focal_length = 0.1f;
+        float eye_separation; // For stereo rendering
 
     private:
         float _distance_before_fade = 5.0f;

@@ -12,13 +12,11 @@ uniform uint stereo_mode;
 uniform vec2 resolution;
 
 void main() {
-    bool stereo = bool(stereo_mode);
-
     const ivec2 coord = ivec2(gl_FragCoord.xy);
 
     vec3 frag;
 
-    if (stereo)
+    if (stereo_mode == 1)
     {
         const vec2 texCoord = gl_FragCoord.xy / resolution;
         if (texCoord.x < 0.5)
