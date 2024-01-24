@@ -16,8 +16,10 @@ Scene::Scene() {
     spacing = 0.01f;
     fur_color = glm::vec3(1.0f);
     wind_dir = glm::vec3(1.0f, 0.0f, 0.0f);
-    fur_type = 2;
+    fur_type = 0;
 //    _blue_noise_texture = std::make_shared<Texture>(Texture::BlueNoiseTexture(64)) ;
+
+    eye_separation = 0.0f;
 }
 
 void Scene::add_object(SceneObject obj) {
@@ -51,12 +53,31 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
     _sun_color = color;
 }
 
-void Scene::render(double delta_time) {
+void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) {
+    glm::mat4 view_proj_left, view_proj_right;
+    glm::vec4 left_eye_right_plane_WS, right_eye_left_plane_WS;
+    if (stereo_mode > 0) {
+        view_proj_left = _camera.view_proj_matrix() * glm::translate(glm::mat4(1.0f), _camera.right() * -eye_separation);
+        view_proj_right = _camera.view_proj_matrix() * glm::translate(glm::mat4(1.0f), _camera.right() * eye_separation);
+        if (stereo_mode > 1) {
+            left_eye_right_plane_WS = glm::vec4(_camera.build_frustum_WS()._right_normal, -eye_separation);
+            right_eye_left_plane_WS = glm::vec4(_camera.build_frustum_WS()._left_normal, eye_separation);
+        }
+//        _camera.set_ratio(16.0f / 9.0f * 2.0f);
+    }
     // Fill and bind frame data buffer
     _data_buffer = TypedBuffer<shader::FrameData>(nullptr, 1);
     {
         auto mapping = _data_buffer.map(AccessType::WriteOnly);
         mapping[0].camera.view_proj = _camera.view_proj_matrix();
+        if (stereo_mode > 0) {
+            mapping[0].camera.view_proj_left = view_proj_left;
+            mapping[0].camera.view_proj_right = view_proj_right;
+        }
+        if (stereo_mode > 1) { // for instanced stereo rendering
+            mapping[0].camera.left_eye_right_plane_WS = left_eye_right_plane_WS;
+            mapping[0].camera.right_eye_left_plane_WS = right_eye_left_plane_WS;
+        }
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
         mapping[0].sun_dir = glm::normalize(_sun_direction);
@@ -103,12 +124,13 @@ void Scene::render(double delta_time) {
                 if (ratio < 0.2f)
                     ratio = 0.2f;
                 instance_count_ = (unsigned) (instance_count * ratio);
-            }
 
-            obj.renderFur(instance_count_);
+            }
+            instance_count_ *= (stereo_mode == 2 ? 2 : 1);
+            obj.renderFur(instance_count_, stereo_mode, left_eye);
         }
         else
-            obj.render();
+            obj.render(stereo_mode, left_eye);
     }
 
 }

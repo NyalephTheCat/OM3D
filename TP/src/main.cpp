@@ -21,8 +21,10 @@ static float delta_time = 0.0f;
 static std::unique_ptr<Scene> scene;
 static std::vector<std::string> scene_files;
 
-// for fur
+// for stereoscopic rendering
+static u32 stereo_mode = 0; // 0: none, 1: double_render, 2: using nvdia, 3: using my method
 
+u32 g_buffer_mode = 1;  // 0: none, 1: albedo, 2: normal, 3: depth
 
 namespace OM3D {
 extern bool audit_bindings_before_draw;
@@ -107,13 +109,6 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
     mouse_pos = new_mouse_pos;
 }
 
-u32 g_buffer_mode = 0;  // 0: none, 1: albedo, 2: normal, 3: depth
-
-void set_g_buffer_mode(u32 mode) {
-    g_buffer_mode = mode;
-    printf("g_buffer_mode = %d\n", g_buffer_mode);
-}
-
 void gui(ImGuiRenderer& imgui) {
     imgui.start();
     DEFER(imgui.finish());
@@ -148,7 +143,7 @@ void gui(ImGuiRenderer& imgui) {
         if(scene && ImGui::BeginMenu("Fur")) {
 
             ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&scene->instance_count), 0, 100);
-            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.25f);
+            ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.05f);
             ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
             ImGui::SliderFloat("fur_length", &scene->fur_length, 0.0f, 5.0f);
             ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
@@ -158,6 +153,12 @@ void gui(ImGuiRenderer& imgui) {
             ImGui::SliderFloat("wind_dir_x", &scene->wind_dir.x, -1.0f, 1.0f);
             ImGui::SliderFloat("wind_dir_y", &scene->wind_dir.y, -1.0f, 1.0f);
             ImGui::SliderFloat("wind_dir_z", &scene->wind_dir.z, -1.0f, 1.0f);
+            ImGui::EndMenu();
+        }
+
+        if(scene && ImGui::BeginMenu("Stereo")) {
+            ImGui::SliderInt("stereo_mode", (int*) &stereo_mode, 0, 2);
+            ImGui::SliderFloat("eye_separation", &scene->eye_separation, 0.0f, 3.f);
             ImGui::EndMenu();
         }
 
@@ -256,15 +257,22 @@ struct RendererState {
         state.size = size;
 
         if(state.size.x > 0 && state.size.y > 0) {
-            state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT);
-            state.albedo_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-            state.normal_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-            state.display_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.lighting_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.depth_texture_left = Texture(size, ImageFormat::Depth32_FLOAT);
+            state.depth_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.depth_texture_right2 = Texture(size, ImageFormat::Depth32_FLOAT);
+            state.albedo_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.albedo_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.normal_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.normal_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.display_texture_left = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.display_texture_right = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.lighting_texture_left = Texture(size, ImageFormat::RGBA16_FLOAT);
+            state.lighting_texture_right = Texture(size, ImageFormat::RGBA16_FLOAT);
 //            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.g_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.albedo_texture, &state.normal_texture});
-            state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture});
-            state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture});
+            state.g_framebuffer = Framebuffer(&state.depth_texture_left, std::array{&state.albedo_texture_left, &state.normal_texture_left}); //, &state.depth_texture_right, &state.albedo_texture_right, &state.normal_texture_right});
+            state.g_framebuffer_right = Framebuffer(&state.depth_texture_right2, std::array{&state.albedo_texture_right, &state.normal_texture_right});
+            state.display_framebuffer = Framebuffer(nullptr, std::array{&state.display_texture_left, &state.display_texture_right});
+            state.lighting_framebuffer = Framebuffer(nullptr, std::array{&state.lighting_texture_left, &state.lighting_texture_right});
 //            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
         }
 
@@ -273,14 +281,21 @@ struct RendererState {
 
     glm::uvec2 size = {};
 
-    Texture depth_texture;
-    Texture albedo_texture;
-    Texture normal_texture;
-    Texture display_texture;
-    Texture lighting_texture;
+    Texture depth_texture_left;
+    Texture depth_texture_right;
+    Texture depth_texture_right2;
+    Texture albedo_texture_left;
+    Texture albedo_texture_right;
+    Texture normal_texture_left;
+    Texture normal_texture_right;
+    Texture display_texture_left;
+    Texture display_texture_right;
+    Texture lighting_texture_left;
+    Texture lighting_texture_right;
 //    Texture tone_mapped_texture;
 
     Framebuffer g_framebuffer;
+    Framebuffer g_framebuffer_right;
     Framebuffer display_framebuffer;
     Framebuffer lighting_framebuffer;
 //    Framebuffer tone_map_framebuffer;
@@ -332,6 +347,9 @@ int main(int argc, char** argv) {
             if(renderer.size != glm::uvec2(width, height)) {
                 renderer = RendererState::create(glm::uvec2(width, height));
             }
+            // to use with nvidia stereo for viewport separation, now to find where
+        //    glViewportIndexedf(0, 0, 0, width / 2, height);
+        //    glViewportIndexedf(1, width / 2, 0, width / 2, height);
         }
 
         update_delta_time();
@@ -344,7 +362,14 @@ int main(int argc, char** argv) {
         {
             renderer.g_framebuffer.bind();
             auto time = program_time(); // or use delta_time ?
-            scene->render(time);
+            if (stereo_mode != 1) {
+                scene->render(time, stereo_mode);
+            }
+            else {
+                scene->render(time, stereo_mode, true);
+                renderer.g_framebuffer_right.bind();
+                scene->render(time, stereo_mode, false);
+            }
         }
 
         if (g_buffer_mode > 0) {
@@ -353,9 +378,29 @@ int main(int argc, char** argv) {
 
             // set uniform value g_buffer_mode
             g_buffer_program->set_uniform(HASH("g_buffer_mode"), g_buffer_mode);
-            renderer.albedo_texture.bind(0);
-            renderer.normal_texture.bind(1);
-            renderer.depth_texture.bind(2);
+            g_buffer_program->set_uniform(HASH("stereo_mode"), (u32)stereo_mode);
+            g_buffer_program->set_uniform(HASH("resolution"), renderer.size);
+            switch (g_buffer_mode) {
+                case 1:
+                    renderer.albedo_texture_left.bind(0);
+                    if (stereo_mode == 1)
+                        renderer.albedo_texture_right.bind(1);
+                    break;
+                case 2:
+                    renderer.normal_texture_left.bind(0);
+                    if (stereo_mode == 1)
+                        renderer.normal_texture_right.bind(1);
+                    break;
+                case 3:
+                    renderer.depth_texture_left.bind(0);
+                    if (stereo_mode == 1)
+                        renderer.depth_texture_right2.bind(1);
+                    if (stereo_mode == 1)
+                        renderer.depth_texture_right.bind(1);
+                    break;
+                default:
+                    break;
+            }
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
             // Blit display result to screen
@@ -372,18 +417,24 @@ int main(int argc, char** argv) {
         renderer.lighting_framebuffer.bind();
         sun_lightning_program->bind();
 
-        renderer.albedo_texture.bind(0);
-        renderer.normal_texture.bind(1);
-        renderer.depth_texture.bind(2);
+        renderer.albedo_texture_left.bind(0);
+        renderer.normal_texture_left.bind(1);
+        renderer.depth_texture_left.bind(2);
+        if (stereo_mode == 1) {
+            renderer.albedo_texture_right.bind(3);
+            renderer.normal_texture_right.bind(4);
+            renderer.depth_texture_right.bind(5);
+        }
 
         // uniform
         sun_lightning_program->set_uniform(HASH("sun_dir"), scene->sun_direction());
         sun_lightning_program->set_uniform(HASH("sun_color"), scene->sun_color());
         sun_lightning_program->set_uniform(HASH("sun_intensity"), scene->sun_intensity());
         sun_lightning_program->set_uniform(HASH("ambient_color"), scene->ambient_color());
+        sun_lightning_program->set_uniform(HASH("stereo_mode"), (u32)stereo_mode);
+        sun_lightning_program->set_uniform(HASH("resolution"), renderer.size);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
-
         // Blit display result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         renderer.lighting_framebuffer.blit();

@@ -6,8 +6,11 @@
 
 // #define DEBUG_NORMAL
 
-layout(location = 0) out vec4 out_albedo;
-layout(location = 1) out vec4 out_normal;
+layout(location = 0) out vec4 out_albedo_left;
+layout(location = 1) out vec4 out_normal_left;
+layout(location = 2) out vec4 out_depth_right;
+layout(location = 3) out vec4 out_albedo_right;
+layout(location = 4) out vec4 out_normal_right;
 
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec2 in_uv;
@@ -33,18 +36,11 @@ layout(binding = 2) uniform Fur {
     FurData fur;
 };
 
-const vec3 ambient = vec3(0.0);
-
 uniform uint instance_count;
-float instance_ratio = float(instanceID) / float(instance_count);
+uniform uint render_mode;
+uniform uint left_eye;
 
-float furNoise(vec2 uv, float scale, float threshold) {
-    float x = (uv.x * scale) * 1234.5678f;
-    float y = (uv.y * scale) * 4321.1234f;
-    float z = dot(vec2(x, y), vec2(12.9898f, 78.233f));
-    float noise = fract(sin(z) * 43758.5453f);
-    return step(threshold, noise);
-}
+float instance_ratio = float(instanceID) / float(instance_count);
 
 float fur_pattern(vec2 TexCoords) { // varies depending on fur.density
     float frequency = fur.fur_density * 100 * 2.0 * 3.14159; // Adjust the frequency as needed
@@ -82,6 +78,53 @@ float blue_noise(vec2 TexCoords) {
 }
 
 void main() {
+
+    if (render_mode == 1 && !bool(left_eye)) // right eye, meaning stereo on
+    {
+        out_normal_right = vec4(in_normal * 0.5 + 0.5, 1.0);
+
+        if (fur.fur_type == 0) {  // no fur
+            out_albedo_right = vec4(fur.fur_color * in_color, 1.0);
+            #ifdef TEXTURED
+            out_albedo_right *= texture(in_texture, in_uv);
+            #endif
+            return;
+        }
+
+        if (instanceID == 0) {
+            out_albedo_right = vec4(0.0, 0.0, 0.0, 1.0);
+            out_normal_right = vec4(in_normal * 0.5 + 0.5, 1.0); //
+            return;
+        }
+
+        float value;
+        switch (fur.fur_type) {
+            case 1:
+                value = fur_pattern(in_uv);
+                break;
+            case 2:
+                value = thicc_hairs_pattern(in_uv);
+                break;
+            case 3:
+                value = stripe_pattern(in_uv);
+                break;
+            default:
+                value = 1;
+                break;
+        }
+
+        if (value < float(instanceID) / float(instance_count))
+            discard;
+        else
+            out_albedo_right = vec4(fur.fur_color * instance_ratio, 1.0) * value;
+
+        #ifdef TEXTURED
+        out_albedo_right *= texture(in_texture, in_uv);
+        #endif
+        out_depth_right = vec4(gl_FragCoord.z, 0.0, 0.0, 0.0);
+        return;
+    }
+
     #ifdef NORMAL_MAPPED
     const vec3 normal_map = unpack_normal_map(texture(in_normal_texture, in_uv).xy);
     const vec3 normal = normal_map.x * in_tangent +
@@ -91,19 +134,19 @@ void main() {
     const vec3 normal = in_normal;
     #endif
 
-    out_normal = vec4(normal * 0.5 + 0.5, 1.0);
+    out_normal_left = vec4(normal * 0.5 + 0.5, 1.0);
 
     if (fur.fur_type == 0) {  // no fur
-        out_albedo = vec4(fur.fur_color * in_color, 1.0);
+        out_albedo_left = vec4(fur.fur_color * in_color, 1.0);
         #ifdef TEXTURED
-        out_albedo *= texture(in_texture, in_uv);
+        out_albedo_left *= texture(in_texture, in_uv);
         #endif
         return;
     }
 
     if (instanceID == 0) {
-        out_albedo = vec4(0.0, 0.0, 0.0, 1.0);
-        out_normal = vec4(normal * 0.5 + 0.5, 1.0); //
+        out_albedo_left = vec4(0.0, 0.0, 0.0, 1.0);
+        out_normal_left = vec4(normal * 0.5 + 0.5, 1.0); //
         return;
     }
 
@@ -129,10 +172,10 @@ void main() {
     if (value < float(instanceID) / float(instance_count))
         discard;
     else
-        out_albedo = vec4(fur.fur_color * instance_ratio, 1.0) * value;
+        out_albedo_left = vec4(fur.fur_color * instance_ratio, 1.0) * value;
 
     #ifdef TEXTURED
-    out_albedo *= texture(in_texture, in_uv);
+    out_albedo_left *= texture(in_texture, in_uv);
     #endif
     // depth is already written
 }
