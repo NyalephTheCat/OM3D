@@ -34,10 +34,11 @@ float instance_ratio = float(gl_InstanceID) / float(instance_count);
 void main() {
 
     instanceID = gl_InstanceID;
-//    vec4 position = model * vec4((in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)) * sin(time), 1.0);
+    //    vec4 position = model * vec4((in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)) * sin(time), 1.0);
     vec3 wind_displacement = fur.wind_dir * ( (gl_InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - gl_InstanceID * 0.1f * fur.wind) );
     vec4 position = model * vec4(in_pos + in_pos * fur.spacing * (gl_InstanceID + 1)
-                                        + wind_displacement, 1.0);
+    + wind_displacement, 1.0);
+
     position += vec4(0, -fur.gravity * gl_InstanceID, 0, 0);
 
     out_normal = normalize(mat3(model) * in_normal);
@@ -50,4 +51,3 @@ void main() {
 
     gl_Position = frame.camera.view_proj * position;
 }
-

@@ -61,6 +61,26 @@ float thicc_hairs_pattern(vec2 TexCoords) {
     return sin(fur.fur_density * 300.0 * TexCoords.x) * sin(fur.fur_density * 300.0 * TexCoords.y);
 }
 
+float pseudoBlueNoise(int x, int y) {
+    const int s = 6;
+    int a, b, v = 0;
+
+    for (int i = 0; i < s; ++i) {
+        b = y;
+        a = 1 & (x ^ int(float(x * 212281 + y * 384817) * 0.003257328990228013));
+        b = 1 & (b ^ int(float(x * 484829 + y * 112279) * 0.002004008016032064));
+        x >>= 1;
+        y >>= 1;
+        v = (v << 2) | (a + (b << 1) + 1) % 4;
+    }
+
+    return float(v) / float(1 << (s << 1));
+}
+
+float blue_noise(vec2 TexCoords) {
+    return pseudoBlueNoise(int(TexCoords.x * 1024.0 * fur.fur_density), int(TexCoords.y * 1024.0 * fur.fur_density));
+}
+
 void main() {
     #ifdef NORMAL_MAPPED
     const vec3 normal_map = unpack_normal_map(texture(in_normal_texture, in_uv).xy);
@@ -97,6 +117,9 @@ void main() {
             break;
         case 3:
             value = stripe_pattern(in_uv);
+            break;
+        case 4:
+            value = blue_noise(in_uv);
             break;
         default:
             value = 1;
