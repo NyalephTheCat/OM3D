@@ -123,9 +123,10 @@ void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) 
                 auto ratio = 1 - (distance - _distance_before_fade) / 10;
                 if (ratio < 0.2f)
                     ratio = 0.2f;
-                instance_count_ = (unsigned) (instance_count * ratio) * (stereo_mode == 2 ? 2 : 1);
-            }
+                instance_count_ = (unsigned) (instance_count * ratio);
 
+            }
+            instance_count_ *= (stereo_mode == 2 ? 2 : 1);
             obj.renderFur(instance_count_, stereo_mode, left_eye);
         }
         else

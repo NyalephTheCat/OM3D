@@ -59,7 +59,7 @@ float thicc_hairs_pattern(vec2 TexCoords) {
 
 void main() {
 
-    if (render_mode == 1 && left_eye == 0) // right eye, meaning stereo on
+    if (render_mode == 1 && !bool(left_eye)) // right eye, meaning stereo on
     {
         out_normal_right = vec4(in_normal * 0.5 + 0.5, 1.0);
 

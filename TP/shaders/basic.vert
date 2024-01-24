@@ -33,20 +33,20 @@ uniform uint left_eye;
 
 void main() {
 
-    int InstanceID = gl_InstanceID;
+    instanceID = gl_InstanceID;
     if (render_mode == 2)
-        InstanceID = InstanceID / 2;
-    float instance_ratio = float(InstanceID) / float(instance_count);
+        instanceID = instanceID / 2;
+    float instance_ratio = float(instanceID) / float(instance_count);
     vec4 position;
 
     if (fur.fur_type != 0)
     {
-        vec3 wind_displacement = fur.wind_dir * ((InstanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - InstanceID * 0.1f * fur.wind));
+        vec3 wind_displacement = fur.wind_dir * ((instanceID + 1) * 0.01 * fur.wind * sin(float(fur.time) * 2 * PI * fur.wind - instanceID * 0.1f * fur.wind));
 
-        position = model * vec4(in_pos + in_pos * fur.spacing * (InstanceID + 1)
+        position = model * vec4(in_pos + in_pos * fur.spacing * (instanceID + 1)
         + wind_displacement, 1.0);
 
-        position += vec4(0, -fur.gravity * InstanceID, 0, 0);
+        position += vec4(0, -fur.gravity * instanceID, 0, 0);
     }
     else
     {
