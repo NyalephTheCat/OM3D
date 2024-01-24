@@ -49,7 +49,7 @@ void SceneObject::renderFur(unsigned int instance_count, unsigned char render_mo
     }
 
     _material->set_uniform(HASH("model"), transform());
-    _material->set_uniform(HASH("instance_count"), instance_count);
+    _material->set_uniform(HASH("instance_count"), u32(instance_count / 2));
     _material->set_uniform(HASH("render_mode"), (u32) render_mode);
     _material->set_uniform(HASH("left_eye"), (u32)left_eye);
     _material->set_backface_culling(false);
