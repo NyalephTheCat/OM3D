@@ -28,6 +28,7 @@ uniform mat4 model;  // The model matrix, replaced by the instancing data
 uniform uint instance_count;
 uniform uint render_mode;
 uniform uint left_eye;
+uniform float IPD;
 
 float instance_ratio = float(gl_InstanceID) / float(instance_count);
 
@@ -52,7 +53,7 @@ void main() {
 
     float offset = 0.0;
     if (render_mode > 0)
-        offset = bool(left_eye) ? -fur.eye_offset : fur.eye_offset;
+        offset = bool(left_eye) ? -IPD : IPD;
 
     gl_Position = frame.camera.view_proj * position + vec4(offset, 0, 0, 0);
 }
