@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "TP window", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1200, 800, "TP window", nullptr, nullptr);
     glfw_check(window);
     DEFER(glfwDestroyWindow(window));
 

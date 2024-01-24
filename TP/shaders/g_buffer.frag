@@ -62,9 +62,9 @@ void main() {
     uint instanceID = instanceID / 2;
     // if render_mode == 2, depending on left_eye and the position x of the fragment on the screen
     if (render_mode == 2) {
-        if (left && gl_FragCoord.x > 0.5 * 800) // hardcoded screen width by lack of time
+        if (left && gl_FragCoord.x > 0.5 * 1200) // hardcoded screen width by lack of time
             discard;
-        if (!left && gl_FragCoord.x < 0.5 * 800)
+        if (!left && gl_FragCoord.x < 0.5 * 1200)
             discard;
     }
 
