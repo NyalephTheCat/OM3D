@@ -78,6 +78,15 @@ float blue_noise(vec2 TexCoords) {
 }
 
 void main() {
+    bool left = instanceID % 2 == 0;
+    uint instanceID = instanceID / 2;
+    // if render_mode == 2, depending on left_eye and the position x of the fragment on the screen
+    if (render_mode == 2) {
+        if (left && gl_FragCoord.x > 0.5 * 800) // hardcoded screen width by lack of time
+            discard;
+        if (!left && gl_FragCoord.x < 0.5 * 800)
+            discard;
+    }
 
     if (render_mode == 1 && !bool(left_eye)) // right eye, meaning stereo on
     {
