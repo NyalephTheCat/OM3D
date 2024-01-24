@@ -4,6 +4,7 @@ struct CameraData {
     mat4 view_proj_right;
     vec4 left_eye_right_plane_WS;
     vec4 right_eye_left_plane_WS;
+    uint window_width;
 };
 
 struct FrameData {

@@ -22,6 +22,10 @@ Scene::Scene() {
     eye_separation = 0.0f;
 }
 
+void Scene::updateFurLength() {
+    instance_count = static_cast<unsigned int>(fur_length / spacing);
+}
+
 void Scene::add_object(SceneObject obj) {
     if (std::find(_materials.begin(), _materials.end(), obj.material()) == _materials.end())
         _materials.emplace_back(obj.material());
@@ -77,6 +81,7 @@ void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) 
         if (stereo_mode > 1) { // for instanced stereo rendering
             mapping[0].camera.left_eye_right_plane_WS = left_eye_right_plane_WS;
             mapping[0].camera.right_eye_left_plane_WS = right_eye_left_plane_WS;
+            mapping[0].camera.window_width = window_width;
         }
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
@@ -126,7 +131,7 @@ void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) 
                 instance_count_ = (unsigned) (instance_count * ratio);
 
             }
-            instance_count_ *= (stereo_mode == 2 ? 2 : 1);
+//            instance_count_ *= (stereo_mode == 2 ? 2 : 1);
             obj.renderFur(instance_count_, stereo_mode, left_eye);
         }
         else

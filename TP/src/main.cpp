@@ -104,6 +104,7 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
         int height = 0;
         glfwGetWindowSize(window, &width, &height);
         camera.set_ratio(float(width) / float(height));
+        scene->window_width = width;
     }
 
     mouse_pos = new_mouse_pos;
@@ -141,11 +142,15 @@ void gui(ImGuiRenderer& imgui) {
         }
 
         if(scene && ImGui::BeginMenu("Fur")) {
-
+            float fur_length = scene->fur_length;
             ImGui::SliderInt("instance_count", reinterpret_cast<int *>(&scene->instance_count), 0, 100);
             ImGui::SliderFloat("spacing", &scene->spacing, 0.0f, 0.05f);
             ImGui::SliderInt("fur_type", (int*) &scene->fur_type, 0, 5);
-            ImGui::SliderFloat("fur_length", &scene->fur_length, 0.0f, 5.0f);
+            ImGui::SliderFloat("fur_length", &fur_length, 0.0f, 5.0f);
+            if (fur_length != scene->fur_length) {
+                scene->fur_length = fur_length;
+                scene->updateFurLength();
+            }
             ImGui::SliderFloat("fur_density", &scene->fur_density, 0.0f, 1.0f);
             ImGui::SliderFloat("gravity", &scene->gravity, 0.0f, 0.1f);
             ImGui::SliderFloat("wind", &scene->wind, 0.0f, 10.0f);
@@ -314,7 +319,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "TP window", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1200, 800, "TP window", nullptr, nullptr);
     glfw_check(window);
     DEFER(glfwDestroyWindow(window));
 

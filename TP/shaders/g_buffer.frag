@@ -8,9 +8,6 @@
 
 layout(location = 0) out vec4 out_albedo_left;
 layout(location = 1) out vec4 out_normal_left;
-layout(location = 2) out vec4 out_depth_right;
-layout(location = 3) out vec4 out_albedo_right;
-layout(location = 4) out vec4 out_normal_right;
 
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec2 in_uv;
@@ -38,7 +35,6 @@ layout(binding = 2) uniform Fur {
 
 uniform uint instance_count;
 uniform uint render_mode;
-uniform uint left_eye;
 
 float instance_ratio = float(instanceID) / float(instance_count);
 
@@ -80,59 +76,16 @@ float blue_noise(vec2 TexCoords) {
 void main() {
     bool left = instanceID % 2 == 0;
     uint instanceID = instanceID / 2;
-    // if render_mode == 2, depending on left_eye and the position x of the fragment on the screen
+
     if (render_mode == 2) {
-        if (left && gl_FragCoord.x > 0.5 * 800) // hardcoded screen width by lack of time
+        float half_width = frame.camera.window_width * 0.5;
+        if (left && gl_FragCoord.x > half_width)
             discard;
-        if (!left && gl_FragCoord.x < 0.5 * 800)
+        if (!left && gl_FragCoord.x < half_width)
             discard;
     }
 
-    if (render_mode == 1 && !bool(left_eye)) // right eye, meaning stereo on
-    {
-        out_normal_right = vec4(in_normal * 0.5 + 0.5, 1.0);
 
-        if (fur.fur_type == 0) {  // no fur
-            out_albedo_right = vec4(fur.fur_color * in_color, 1.0);
-            #ifdef TEXTURED
-            out_albedo_right *= texture(in_texture, in_uv);
-            #endif
-            return;
-        }
-
-        if (instanceID == 0) {
-            out_albedo_right = vec4(0.0, 0.0, 0.0, 1.0);
-            out_normal_right = vec4(in_normal * 0.5 + 0.5, 1.0); //
-            return;
-        }
-
-        float value;
-        switch (fur.fur_type) {
-            case 1:
-                value = fur_pattern(in_uv);
-                break;
-            case 2:
-                value = thicc_hairs_pattern(in_uv);
-                break;
-            case 3:
-                value = stripe_pattern(in_uv);
-                break;
-            default:
-                value = 1;
-                break;
-        }
-
-        if (value < float(instanceID) / float(instance_count))
-            discard;
-        else
-            out_albedo_right = vec4(fur.fur_color * instance_ratio, 1.0) * value;
-
-        #ifdef TEXTURED
-        out_albedo_right *= texture(in_texture, in_uv);
-        #endif
-        out_depth_right = vec4(gl_FragCoord.z, 0.0, 0.0, 0.0);
-        return;
-    }
 
     #ifdef NORMAL_MAPPED
     const vec3 normal_map = unpack_normal_map(texture(in_normal_texture, in_uv).xy);
