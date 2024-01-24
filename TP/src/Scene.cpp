@@ -22,6 +22,10 @@ Scene::Scene() {
     eye_separation = 0.0f;
 }
 
+void Scene::updateFurLength() {
+    instance_count = static_cast<unsigned int>(fur_length / spacing);
+}
+
 void Scene::add_object(SceneObject obj) {
     if (std::find(_materials.begin(), _materials.end(), obj.material()) == _materials.end())
         _materials.emplace_back(obj.material());
