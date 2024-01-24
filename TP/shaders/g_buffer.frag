@@ -35,7 +35,6 @@ layout(binding = 2) uniform Fur {
 
 uniform uint instance_count;
 uniform uint render_mode;
-uniform uint left_eye;
 
 float instance_ratio = float(instanceID) / float(instance_count);
 
@@ -59,9 +58,10 @@ void main() {
     uint instanceID = instanceID / 2;
 
     if (render_mode == 2) {
-        if (left && gl_FragCoord.x > 0.5 * 1200) // hardcoded screen width by lack of time
+        float half_width = frame.camera.window_width * 0.5;
+        if (left && gl_FragCoord.x > half_width)
             discard;
-        if (!left && gl_FragCoord.x < 0.5 * 1200)
+        if (!left && gl_FragCoord.x < half_width)
             discard;
     }
 

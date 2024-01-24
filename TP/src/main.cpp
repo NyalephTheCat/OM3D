@@ -104,6 +104,7 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
         int height = 0;
         glfwGetWindowSize(window, &width, &height);
         camera.set_ratio(float(width) / float(height));
+        scene->window_width = width;
     }
 
     mouse_pos = new_mouse_pos;

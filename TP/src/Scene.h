@@ -45,7 +45,7 @@ class Scene : NonMovable {
 
         void updateFurLength();
 
-        unsigned instance_count, fur_type;
+        unsigned instance_count, fur_type, window_width;
         float fur_length, fur_density, gravity, wind, spacing;
         glm::vec3 fur_color{}, wind_dir{};
 
