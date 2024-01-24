@@ -92,7 +92,7 @@ std::shared_ptr<Material> Material::empty_material() {
 
 Material Material::textured_material() {
     Material material;
-    material._program = Program::from_files("g_buffer.frag", "basic.vert", {"TEXTURED"});
+    material._program = Program::from_files("g_buffer_NV_stereo.frag", "basic_NV_stereo.vert", {"TEXTURED"});
     return material;
 }
 

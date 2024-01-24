@@ -1,5 +1,12 @@
 #include "structs.glsl"
 
+//glm::translate
+mat4 translate(mat4 m, vec3 v) {
+    mat4 result = m;
+    result[3] = m[0] * v.x + m[1] * v.y + m[2] * v.z + m[3];
+    return result;
+}
+
 float sqr(float x) {
     return x * x;
 }

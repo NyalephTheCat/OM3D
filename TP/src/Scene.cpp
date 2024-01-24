@@ -69,6 +69,7 @@ void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) 
         mapping[0].camera.view_proj = _camera.projection_matrix() * view;
         mapping[0].camera.view = view;
         mapping[0].camera.proj = _camera.projection_matrix();
+        mapping[0].camera.right = _camera.right();
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
         mapping[0].sun_dir = glm::normalize(_sun_direction);

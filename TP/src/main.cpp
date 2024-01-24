@@ -22,7 +22,7 @@ static std::unique_ptr<Scene> scene;
 static std::vector<std::string> scene_files;
 
 // for stereoscopic rendering
-static u32 stereo_mode = 1; // 0: none, 1: double_render, 2: using nvdia, 3: using my method
+static u32 stereo_mode = 0; // 0: none, 1: double_render, 2: using nvdia, 3: using my method
 
 u32 g_buffer_mode = 1;  // 0: none, 1: albedo, 2: normal, 3: depth
 
