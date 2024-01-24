@@ -75,7 +75,7 @@ float blue_noise(vec2 TexCoords) {
 
 void main() {
     bool left = instanceID % 2 == 0;
-    uint instanceID = instanceID / 2;
+    uint instanceID_ = instanceID / 2;
 
     if (render_mode == 2) {
         float half_width = frame.camera.window_width * 0.5;
@@ -106,7 +106,7 @@ void main() {
         return;
     }
 
-    if (instanceID == 0) {
+    if (instanceID_ == 0) {
         out_albedo_left = vec4(0.0, 0.0, 0.0, 1.0);
         out_normal_left = vec4(normal * 0.5 + 0.5, 1.0); //
         return;
@@ -131,7 +131,7 @@ void main() {
             break;
     }
 
-    if (value < float(instanceID) / float(instance_count))
+    if (value < float(instanceID_) / float(instance_count))
         discard;
     else
         out_albedo_left = vec4(fur.fur_color * instance_ratio, 1.0) * value;
