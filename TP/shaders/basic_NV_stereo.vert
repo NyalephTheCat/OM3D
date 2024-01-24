@@ -1,4 +1,6 @@
-#version 450 core
+#version 450
+
+#extension GL_NV_viewport_array2 : enable
 #extension GL_NV_stereo_view_rendering : require
 
 #include "utils.glsl"
@@ -52,10 +54,9 @@ void main() {
     out_color = in_color;
     out_position = position.xyz;
 
-    mat4 view = frame.camera.view;
-
-    gl_Position = frame.camera.proj * translate(view, frame.camera.right * -IPD) * position;
-    gl_SecondaryPositionNV = frame.camera.proj * translate(view, frame.camera.right * IPD) * position; // Offset for the secondary view
-    gl_SecondaryViewportMaskNV[0] = 0x3; // Use the first two viewports for the secondary view
+    gl_Position = frame.camera.view_proj * position - vec4(IPD, 0, 0, 0);
+    gl_SecondaryPositionNV = frame.camera.view_proj * position + vec4(IPD, 0, 0, 0);
+    gl_ViewportMask[0] = 1; // Use the first viewport for the primary view
+    gl_SecondaryViewportMaskNV[0] = 2; // Use the first two viewports for the secondary view
 }
 

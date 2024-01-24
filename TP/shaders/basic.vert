@@ -50,22 +50,10 @@ void main() {
     out_color = in_color;
     out_position = position.xyz;
 
-    /*mat4 view = frame.camera.view;
+    float offset = 0.0;
+    if (render_mode > 0)
+        offset = bool(left_eye) ? -fur.eye_offset : fur.eye_offset;
 
-    if (render_mode > 0){
-        if (left_eye == 0)
-            view = mat4(1.0, 0.0, 0.0, IPD,
-                                0.0, 1.0, 0.0, 0.0,
-                                0.0, 0.0, 1.0, 0.0,
-                                0.0, 0.0, 0.0, 1.0) * view;
-        else
-            view = mat4(1.0, 0.0, 0.0, -IPD,
-                                0.0, 1.0, 0.0, 0.0,
-                                0.0, 0.0, 1.0, 0.0,
-                                0.0, 0.0, 0.0, 1.0) * view;
-    }*/
-
-//    gl_Position = frame.camera.proj * view * position;
-    gl_Position = frame.camera.view_proj * position;
+    gl_Position = frame.camera.view_proj * position + vec4(offset, 0, 0, 0);
 }
 

@@ -53,23 +53,11 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
 
 void Scene::render(double delta_time, unsigned char stereo_mode, bool left_eye) {
 
-    glm::mat4 view = _camera.view_matrix();
-    if (stereo_mode > 0)
-    {
-        if (left_eye) // translate camera view matrix on its left
-            view = glm::translate(view, _camera.right() * -eye_separation);
-        else // translate camera view matrix on its right
-            view = glm::translate(view, _camera.right() * eye_separation);
-    }
-
     // Fill and bind frame data buffer
     _data_buffer = TypedBuffer<shader::FrameData>(nullptr, 1);
     {
         auto mapping = _data_buffer.map(AccessType::WriteOnly);
-        mapping[0].camera.view_proj = _camera.projection_matrix() * view;
-        mapping[0].camera.view = view;
-        mapping[0].camera.proj = _camera.projection_matrix();
-        mapping[0].camera.right = _camera.right();
+        mapping[0].camera.view_proj = _camera.view_proj_matrix();
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
         mapping[0].sun_dir = glm::normalize(_sun_direction);
